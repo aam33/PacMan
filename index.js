@@ -37,15 +37,16 @@ class Player {
         c.fill()
         c.closePath()
     }
+
+    // add function called update that will change position
+    update() {
+        this.draw()
+        this.position.x += this.velocity.x
+        this.position.y += this.velocity.y
+    }
 }
 
-const map = [
-    ['-', '-', '-', '-', '-', '-'],
-    ['-', ' ', ' ', ' ', ' ', '-'],
-    ['-', ' ', '-', '-', ' ', '-'],
-    ['-', ' ', ' ', ' ', ' ', '-'],
-    ['-', '-', '-', '-', '-', '-']
-]
+
 
 const boundaries = []
 // add new player
@@ -60,6 +61,39 @@ const player = new Player({
         y: 0
     }
 })
+const keys = {
+    w: {
+        // by default
+        pressed: false
+    },
+    a: {
+        // by default
+        pressed: false
+    },
+    s: {
+        // by default
+        pressed: false
+    },
+    d: {
+        // by default
+        pressed: false
+    },
+    space: {
+        // by default
+        pressed: false
+    }
+}
+
+// let instead of const
+let lastKey = ''    // empty string by default
+
+const map = [
+    ['-', '-', '-', '-', '-', '-'],
+    ['-', ' ', ' ', ' ', ' ', '-'],
+    ['-', ' ', '-', '-', ' ', '-'],
+    ['-', ' ', ' ', ' ', ' ', '-'],
+    ['-', '-', '-', '-', '-', '-']
+]
 
 map.forEach((row, index) => {
     row.forEach((symbol, j) => {
@@ -79,14 +113,74 @@ map.forEach((row, index) => {
     })
 })
 
-boundaries.forEach((boundary) => {
+
+// animate
+function animate() {
+    requestAnimationFrame(animate)
+    // clear canvas to remove previous position
+    c.clearRect(0, 0, canvas.width, canvas.height)
+    // move in here
+    boundaries.forEach((boundary) => {
     boundary.draw()
 })
 
-player.draw()
+player.update()
+// clear before checking to see which keys pressed
+player.velocity.x = 0
+player.velocity.y = 0
+
+// move within animate function, not event listener
+// === in JS
+    if (keys.w.pressed && lastKey === 'w') {
+        player.velocity.y = -5
+    } else if (keys.a.pressed && lastKey === 'a') {
+        player.velocity.x = -5
+    } else if (keys.s.pressed && lastKey === 's') {
+        player.velocity.y = 5
+    } else if (keys.d.pressed && lastKey === 'd') {
+        player.velocity.x = 5
+    } else if (keys.space.pressed && lastKey === ' ') {
+        // pause if spacebar pressed
+        player.velocity.x = 0
+        player.velocity.y = 0
+    }
+}
+
+animate()
+
+//player.draw()
 
 // listen for WASD movement indication
 // we only want the key
 window.addEventListener('keydown', ({key}) => {
-    console.log(event)
+    console.log(key)
+    // respond to WASD keydown events
+    switch (key) {
+        case 'w':
+            //player.velocity.y = -5
+            keys.w.pressed = true
+            lastKey = 'w'
+            break
+        case 'a':
+            //player.velocity.x = -5
+            keys.a.pressed = true
+            lastKey = 'a'
+            break
+        case 's':
+            //player.velocity.y = 5
+            keys.s.pressed = true
+            lastKey = 's'
+            break
+        case 'd':
+            //player.velocity.x = 5
+            keys.d.pressed = true
+            lastKey = 'd'
+            break
+        case ' ':
+            keys.space.pressed = true
+            lastKey = ' '
+            break
+    }
+
+    console.log(player.velocity)
 })
