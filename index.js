@@ -108,6 +108,8 @@ const map = [
     ['-', ' ', ' ', ' ', ' ', ' ', '-'],
     ['-', ' ', '-', ' ', '-', ' ', '-'],
     ['-', ' ', ' ', ' ', ' ', ' ', '-'],
+    ['-', ' ', '-', '-', '-', ' ', '-'],
+    ['-', ' ', ' ', ' ', ' ', ' ', '-'],
     ['-', '-', '-', '-', '-', '-', '-']
 ]
 
@@ -150,14 +152,90 @@ function animate() {
 
     // move within animate function, not event listener
     // === in JS
+    // predict collision before it happens
     if ((keys.w.pressed && lastKey === 'w') || (keys.ArrowUp.pressed && lastKey === 'ArrowUp')) {
-        player.velocity.y = -5
+        // break does not work in forEach, so refactor to regular for loop
+        for (let i = 0; i < boundaries.length; i++)
+        {
+            const boundary = boundaries[i]
+            if (circleToRectangleCollision({
+                circle: {...player, velocity: {
+                    x: 0,
+                    y: -5
+                }},        // spread operator is ... and it allows us to edit a property
+                rectangle: boundary
+            })) {
+                player.velocity.y = 0       // colliding
+                break
+            } else {
+                player.velocity.y = -5
+            }
+        }
+        /*boundaries.forEach((boundary) => {
+            if (circleToRectangleCollision({
+                circle: {...player, velocity: {
+                    x: 0,
+                    y: -5
+                }},        // spread operator is ... and it allows us to edit a property
+                rectangle: boundary
+            })) {
+                player.velocity.y = 0       // colliding
+                break
+            } else {
+                player.velocity.y = -5
+            }
+        })*/
     } else if ((keys.a.pressed && lastKey === 'a') || (keys.ArrowLeft.pressed && lastKey === 'ArrowLeft')) {
-        player.velocity.x = -5
+        for (let i = 0; i < boundaries.length; i++)
+        {
+            const boundary = boundaries[i]
+            if (circleToRectangleCollision({
+                circle: {...player, velocity: {
+                    x: -5,
+                    y: 0
+                }},
+                rectangle: boundary
+            })) {
+                player.velocity.x = 0       // colliding
+                break
+            } else {
+                player.velocity.x = -5
+            }
+        }
     } else if ((keys.s.pressed && lastKey === 's') || (keys.ArrowDown.pressed && lastKey === 'ArrowDown')) {
-        player.velocity.y = 5
+        for (let i = 0; i < boundaries.length; i++)
+        {
+            const boundary = boundaries[i]
+            if (circleToRectangleCollision({
+                circle: {...player, velocity: {
+                    x: 0,
+                    y: 5
+                }},
+                rectangle: boundary
+            })) {
+                player.velocity.y = 0       // colliding
+                break
+            } else {
+                player.velocity.y = 5
+            }
+        }
     } else if ((keys.d.pressed && lastKey === 'd') || (keys.ArrowRight.pressed && lastKey === 'ArrowRight')) {
-        player.velocity.x = 5
+        for (let i = 0; i < boundaries.length; i++)
+        {
+            const boundary = boundaries[i]
+            if (circleToRectangleCollision({
+                circle: {...player, velocity: {
+                    x: 5,
+                    y: 0
+                }},
+                rectangle: boundary
+            })) {
+                player.velocity.x = 0       // colliding
+                break
+            } else {
+                player.velocity.x = 5
+            }
+        }
     } else if (keys.space.pressed && lastKey === ' ') {
         // pause if spacebar pressed
         player.velocity.x = 0
