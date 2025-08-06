@@ -48,7 +48,28 @@ class Player {
     }
 }
 
+// copy of Player
+class Pellet {
+    constructor({ position, velocity }) {
+        this.position = position
+        //this.velocity = velocity      // pellets don't move
+        this.radius = 3
+    }
 
+    draw() {
+        // beginPath is built-in
+        // start at 0
+        c.beginPath()
+        c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
+        c.fillStyle = '#FFE5B4'
+        c.fill()
+        c.closePath()
+    }
+
+    // no update function because they don't move
+}
+
+const pellets = []
 
 const boundaries = []
 // add new player
@@ -288,6 +309,16 @@ map.forEach((row, index) => {
                     })
                 )
                 break
+            case " ":
+                pellets.push(
+                    new Pellet({
+                        position: {
+                            x: Boundary.width * j + Boundary.width /2,
+                            y: Boundary.height * index + Boundary.height /2     // add this Boundary.__/2 to center pellets
+                        }
+                    })
+                )
+                break
         }
     })
 })
@@ -402,6 +433,39 @@ function animate() {
         player.velocity.x = 0
         player.velocity.y = 0
     }
+
+    // run through loop backwards
+    /*for (let i = pellets.length -1; 0 < i; i--)
+    {
+        const pellet = pellets[i]
+        pellet.draw()
+
+        // difference between pellet and player location
+        if (Math.hypot(pellet.position.x - player.position.x, pellet-position.y - player.position.y) < pellet.radius + player.radius) {
+            console.log('touching')
+            pellets.splice(i, 1)
+        }
+    }*/
+
+
+    // run through loop backwards (prevents flashing)
+    for (let i = pellets.length - 1; 0 < i; i--)
+    {
+        const pellet = pellets[i]       // no weird rendering issues
+        pellet.draw()
+
+        if (
+            Math.hypot(
+                pellet.position.x - player.position.x,
+                pellet.position.y - player.position.y
+            ) <
+            pellet.radius + player.radius
+        ) {
+            console.log('touching')
+            pellets.splice(i, 1)
+        }
+    }
+
 
     // move in here
     boundaries.forEach((boundary) => {
