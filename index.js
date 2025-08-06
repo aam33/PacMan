@@ -122,12 +122,23 @@ function animate() {
     // move in here
     boundaries.forEach((boundary) => {
     boundary.draw()
+
+    // detect if any boundary is overlapping the player -- circular-to-rectangular collision detection
+    // issue: player position point is directly in the center
+    if (player.position.y - player.radius + player.velocity.y <= boundary.position.y + boundary.height && player.position.x + player.radius + player.velocity.x >= boundary.position.x && player.position.y + player.radius + player.velocity.y >= boundary.position.y && player.position.x - player.radius + player.velocity.x <= boundary.position.x + boundary.width)  // if top of player is overlapping with bottom of boundary
+    // velocity will be negative if moving up
+    {
+        console.log('we are colliding')
+        // stop player when we hit a boundary
+        player.velocity.x = 0
+        player.velocity.y = 0
+    }
 })
 
 player.update()
 // clear before checking to see which keys pressed
-player.velocity.x = 0
-player.velocity.y = 0
+//player.velocity.x = 0
+//player.velocity.y = 0
 
 // move within animate function, not event listener
 // === in JS
