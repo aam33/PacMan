@@ -78,6 +78,22 @@ const keys = {
         // by default
         pressed: false
     },
+    ArrowUp: {
+        // by default
+        pressed: false
+    },
+    ArrowLeft: {
+        // by default
+        pressed: false
+    },
+    ArrowDown: {
+        // by default
+        pressed: false
+    },
+    ArrowRight: {
+        // by default
+        pressed: false
+    },
     space: {
         // by default
         pressed: false
@@ -134,13 +150,13 @@ function animate() {
 
     // move within animate function, not event listener
     // === in JS
-    if (keys.w.pressed && lastKey === 'w') {
+    if ((keys.w.pressed && lastKey === 'w') || (keys.ArrowUp.pressed && lastKey === 'ArrowUp')) {
         player.velocity.y = -5
-    } else if (keys.a.pressed && lastKey === 'a') {
+    } else if ((keys.a.pressed && lastKey === 'a') || (keys.ArrowLeft.pressed && lastKey === 'ArrowLeft')) {
         player.velocity.x = -5
-    } else if (keys.s.pressed && lastKey === 's') {
+    } else if ((keys.s.pressed && lastKey === 's') || (keys.ArrowDown.pressed && lastKey === 'ArrowDown')) {
         player.velocity.y = 5
-    } else if (keys.d.pressed && lastKey === 'd') {
+    } else if ((keys.d.pressed && lastKey === 'd') || (keys.ArrowRight.pressed && lastKey === 'ArrowRight')) {
         player.velocity.x = 5
     } else if (keys.space.pressed && lastKey === ' ') {
         // pause if spacebar pressed
@@ -202,6 +218,22 @@ window.addEventListener('keydown', ({key}) => {
             //player.velocity.x = 5
             keys.d.pressed = true
             lastKey = 'd'
+            break
+        case 'ArrowUp':
+            keys.ArrowUp.pressed = true
+            lastKey = 'ArrowUp'
+            break
+        case 'ArrowLeft':
+            keys.ArrowLeft.pressed = true
+            lastKey = 'ArrowLeft'
+            break
+        case 'ArrowDown':
+            keys.ArrowDown.pressed = true
+            lastKey = 'ArrowDown'
+            break
+        case 'ArrowRight':
+            keys.ArrowRight.pressed = true
+            lastKey = 'ArrowRight'
             break
         case ' ':
             keys.space.pressed = true
