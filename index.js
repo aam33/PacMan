@@ -106,13 +106,19 @@ const keys = {
 let lastKey = ''    // empty string by default
 
 const map = [
-    ['1', '-', '-', '-', '-', '-', '2'],
-    ['|', ' ', ' ', ' ', ' ', ' ', '|'],
-    ['|', ' ', 'o', ' ', 'o', ' ', '|'],
-    ['|', ' ', ' ', ' ', ' ', ' ', '|'],
-    ['|', ' ', 'c', '-', '7', ' ', '|'],
-    ['|', ' ', ' ', ' ', ' ', ' ', '|'],
-    ['4', '-', '-', '-', '-', '-', '3']
+    ['1', '=', '=', '=', '=', '=', '=', '=', '=', '=', '2'],
+    ['|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|'],
+    ['|', ' ', 'o', ' ', '[', 't', ']', ' ', 'o', ' ', '|'],
+    ['|', ' ', ' ', ' ', ' ', 'u', ' ', ' ', ' ', ' ', '|'],
+    ['|', ' ', '[', ']', ' ', ' ', ' ', '[', ']', ' ', '|'],
+    ['|', ' ', ' ', ' ', ' ', '^', ' ', ' ', ' ', ' ', '|'],
+    ['|', ' ', 'o', ' ', '[', 'x', ']', ' ', 'o', ' ', '|'],
+    ['|', ' ', ' ', ' ', ' ', 'u', ' ', ' ', ' ', ' ', '|'],
+    ['|', ' ', '[', ']', ' ', ' ', ' ', '[', ']', ' ', '|'],
+    ['|', ' ', ' ', ' ', ' ', '^', ' ', ' ', ' ', ' ', '|'],
+    ['|', ' ', 'o', ' ', '[', '_', ']', ' ', 'o', ' ', '|'],
+    ['|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|'],
+    ['4', '=', '=', '=', '=', '=', '=', '=', '=', '=', '3']
 ]
 
 function createImage(src) {
@@ -128,7 +134,7 @@ map.forEach((row, index) => {
     row.forEach((symbol, j) => {
         console.log(symbol)
         switch (symbol) {
-            case "-":
+            case "=":
                 boundaries.push(
                     new Boundary({
                         position: {
@@ -205,7 +211,7 @@ map.forEach((row, index) => {
                     })
                 )
                 break
-            case "c":
+            case "[":
                 boundaries.push(
                     new Boundary({
                         position: {
@@ -216,7 +222,7 @@ map.forEach((row, index) => {
                     })
                 )
                 break
-            case "7":
+            case "]":
                 boundaries.push(
                     new Boundary({
                         position: {
@@ -224,6 +230,61 @@ map.forEach((row, index) => {
                             y: Boundary.height * index
                         },
                         image: createImage('./img/capRight.png')
+                    })
+                )
+                break
+            case "t":
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * index
+                        },
+                        image: createImage('./img/pipeConnectorBottom.png')
+                    })
+                )
+                break
+            case "u":
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * index
+                        },
+                        image: createImage('./img/capBottom.png')
+                    })
+                )
+                break
+            case "_":
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * index
+                        },
+                        image: createImage('./img/pipeConnectorTop.png')
+                    })
+                )
+                break
+            case "^":
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * index
+                        },
+                        image: createImage('./img/capTop.png')
+                    })
+                )
+                break
+            case "x":
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * index
+                        },
+                        image: createImage('./img/pipeCross.png')
                     })
                 )
                 break
