@@ -72,9 +72,94 @@ class Pellet {
     // no update function because they don't move
 }
 
-const pellets = []
+class PowerUp {
+    constructor({ position, velocity }) {
+        this.position = position
+        //this.velocity = velocity      // pellets don't move
+        this.radius = 3
+    }
 
+    draw() {
+        // beginPath is built-in
+        // start at 0
+        c.beginPath()
+        c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
+        c.fillStyle = '#FFE5B4'
+        c.fill()
+        c.closePath()
+    }
+
+    // no update function because they don't move
+}
+
+class Ghost {
+    static speed = 2    // outside constructor
+    constructor({ position, velocity, color = 'red' }) {
+        this.position = position
+        this.velocity = velocity
+        this.radius = 15
+        this.color = color
+        this.prevCollisions = []
+        this.speed = 2
+    }
+
+    draw() {
+        // beginPath is built-in
+        // start at 0
+        c.beginPath()
+        c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
+        c.fillStyle = this.color
+        c.fill()
+        c.closePath()
+    }
+
+    // add function called update that will change position
+    update() {
+        this.draw()
+        this.position.x += this.velocity.x
+        this.position.y += this.velocity.y
+    }
+}
+
+// arrays
+const pellets = []
 const boundaries = []
+const powerups = []
+const ghosts = [
+    new Ghost({
+        position: {
+            x: Boundary.width * 6 + Boundary.width / 2,
+            y: Boundary.height + Boundary.height / 2
+        },
+        velocity: {
+            x: Ghost.speed,
+            y: 0
+        }
+    }),
+    new Ghost({
+        position: {
+            x: Boundary.width * 6 + Boundary.width / 2,
+            y: Boundary.height * 3 + Boundary.height / 2
+        },
+        velocity: {
+            x: Ghost.speed,
+            y: 0
+        },
+        color: 'pink'
+    }),
+    new Ghost({
+        position: {
+            x: Boundary.width * 4 + Boundary.width / 2,
+            y: Boundary.height * 9 + Boundary.height / 2
+        },
+        velocity: {
+            x: 0,
+            y: -Ghost.speed
+        },
+        color: 'blue'
+    })
+]
+
 // add new player
 const player = new Player({
     position: {
@@ -333,17 +418,23 @@ function circleToRectangleCollision({
     circle,
     rectangle
 }) {
+    // to account for different speeds
+    const padding = Boundary.width /2 - circle.radius - 1   // at least 1 pixel
     return (
         // detect if any boundary is overlapping the player -- circular-to-rectangular collision detection
         // issue: player position point is directly in the center
-        circle.position.y - circle.radius + circle.velocity.y <= rectangle.position.y + rectangle.height && circle.position.x + circle.radius + circle.velocity.x >= rectangle.position.x && circle.position.y + circle.radius + circle.velocity.y >= rectangle.position.y && circle.position.x - circle.radius + circle.velocity.x <= rectangle.position.x + rectangle.width
+        circle.position.y - circle.radius + circle.velocity.y <= rectangle.position.y + rectangle.height + padding && circle.position.x + circle.radius + circle.velocity.x >= rectangle.position.x - padding && circle.position.y + circle.radius + circle.velocity.y >= rectangle.position.y - padding && circle.position.x - circle.radius + circle.velocity.x <= rectangle.position.x + rectangle.width + padding
         // if top of player is overlapping with bottom of boundary, etc.
     )
 }
 
+// animation ID
+let animationID
+
 // animate
 function animate() {
-    requestAnimationFrame(animate)
+    animationID = requestAnimationFrame(animate)
+    console.log(animationID)
     // clear canvas to remove previous position
     c.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -479,9 +570,138 @@ function animate() {
 })
 
 player.update()
-// clear before checking to see which keys pressed
-//player.velocity.x = 0
-//player.velocity.y = 0
+
+ghosts.forEach(ghost => {
+    ghost.update()
+
+    if (
+            Math.hypot(
+                ghost.position.x - player.position.x,
+                ghost.position.y - player.position.y
+            ) <
+            ghost.radius + player.radius
+        ) {
+            cancelAnimationFrame(animationID)
+            console.log('you lose!')
+        }
+
+    // collisions array
+    const collisions = []
+    // detect boundaries
+    boundaries.forEach(boundary => {
+        if (
+            !collisions.includes('right') &&
+            circleToRectangleCollision({
+                circle: {
+                    ...ghost,
+                    velocity: {
+                        x: ghost.speed,
+                        y: 0
+                    }
+                },
+                rectangle: boundary
+            })
+        ) {
+            collisions.push('right')
+        }
+
+        if (
+            !collisions.includes('left') &&
+            circleToRectangleCollision({
+                circle: {
+                    ...ghost,
+                    velocity: {
+                        x: -5,
+                        y: 0
+                    }
+                },
+                rectangle: boundary
+            })
+        ) {
+            collisions.push('left')
+        }
+
+        if (
+            !collisions.includes('up') &&
+            circleToRectangleCollision({
+                circle: {
+                    ...ghost,
+                    velocity: {
+                        x: 0,
+                        y: -5
+                    }
+                },
+                rectangle: boundary
+            })
+        ) {
+            collisions.push('up')
+        }
+
+        if (
+            !collisions.includes('down') &&
+            circleToRectangleCollision({
+                circle: {
+                    ...ghost,
+                    velocity: {
+                        x: 0,
+                        y: 5
+                    }
+                },
+                rectangle: boundary
+            })
+        ) {
+            collisions.push('down')
+        }
+    })
+
+    if (collisions.length > ghost.prevCollisions.length)
+        ghost.prevCollisions = collisions
+
+    if (JSON.stringify(collisions) !== JSON.stringify(ghost.prevCollisions)) {
+        console.log('gogo')
+
+        if (ghost.velocity.x > 0) ghost.prevCollisions.push('right')
+        else if (ghost.velocity.x < 0) ghost.prevCollisions.push('left')
+        else if (ghost.velocity.y < 0) ghost.prevCollisions.push('up')
+        else if (ghost.velocity.y > 0) ghost.prevCollisions.push('down')
+
+        console.log(collisions)
+        console.log(ghost.prevCollisions)
+
+        const pathways = ghost.prevCollisions.filter(collision => {
+            return !collisions.includes(collision)
+        })
+        console.log({pathways})
+
+        // choose random path from pathways array
+        const direction = pathways[Math.floor(Math.random() * pathways.length)]
+
+        console.log({direction})
+
+        switch (direction) {
+            case 'down':
+                ghost.velocity.y = ghost.speed
+                ghost.velocity.x = 0
+                break
+            case 'up':
+                ghost.velocity.y = -ghost.speed
+                ghost.velocity.x = 0
+                break
+            case 'right':
+                ghost.velocity.y = 0
+                ghost.velocity.x = ghost.speed
+                break
+            case 'left':
+                ghost.velocity.y = 0
+                ghost.velocity.x = -ghost.speed
+                break
+        }
+
+        // reset collision
+        ghost.prevCollisions = []
+    }
+    //console.log(collisions)
+})
 
 
 }
