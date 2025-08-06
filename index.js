@@ -2,6 +2,9 @@ const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 console.log(canvas)
 
+const score = document.querySelector('#score')
+console.log(score)
+
 canvas.width = innerWidth
 canvas.height = innerHeight
 
@@ -125,6 +128,8 @@ const keys = {
 
 // let instead of const
 let lastKey = ''    // empty string by default
+
+let scoreVar = 0;   // default
 
 const map = [
     ['1', '=', '=', '=', '=', '=', '=', '=', '=', '=', '2'],
@@ -434,20 +439,6 @@ function animate() {
         player.velocity.y = 0
     }
 
-    // run through loop backwards
-    /*for (let i = pellets.length -1; 0 < i; i--)
-    {
-        const pellet = pellets[i]
-        pellet.draw()
-
-        // difference between pellet and player location
-        if (Math.hypot(pellet.position.x - player.position.x, pellet-position.y - player.position.y) < pellet.radius + player.radius) {
-            console.log('touching')
-            pellets.splice(i, 1)
-        }
-    }*/
-
-
     // run through loop backwards (prevents flashing)
     for (let i = pellets.length - 1; 0 < i; i--)
     {
@@ -463,6 +454,9 @@ function animate() {
         ) {
             console.log('touching')
             pellets.splice(i, 1)
+            // update score
+            scoreVar += 10
+            score.innerHTML = scoreVar
         }
     }
 
