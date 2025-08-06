@@ -88,11 +88,11 @@ const keys = {
 let lastKey = ''    // empty string by default
 
 const map = [
-    ['-', '-', '-', '-', '-', '-'],
-    ['-', ' ', ' ', ' ', ' ', '-'],
-    ['-', ' ', '-', '-', ' ', '-'],
-    ['-', ' ', ' ', ' ', ' ', '-'],
-    ['-', '-', '-', '-', '-', '-']
+    ['-', '-', '-', '-', '-', '-', '-'],
+    ['-', ' ', ' ', ' ', ' ', ' ', '-'],
+    ['-', ' ', '-', ' ', '-', ' ', '-'],
+    ['-', ' ', ' ', ' ', ' ', ' ', '-'],
+    ['-', '-', '-', '-', '-', '-', '-']
 ]
 
 map.forEach((row, index) => {
@@ -114,34 +114,26 @@ map.forEach((row, index) => {
 })
 
 
+function circleToRectangleCollision({
+    circle,
+    rectangle
+}) {
+    return (
+        // detect if any boundary is overlapping the player -- circular-to-rectangular collision detection
+        // issue: player position point is directly in the center
+        circle.position.y - circle.radius + circle.velocity.y <= rectangle.position.y + rectangle.height && circle.position.x + circle.radius + circle.velocity.x >= rectangle.position.x && circle.position.y + circle.radius + circle.velocity.y >= rectangle.position.y && circle.position.x - circle.radius + circle.velocity.x <= rectangle.position.x + rectangle.width
+        // if top of player is overlapping with bottom of boundary, etc.
+    )
+}
+
 // animate
 function animate() {
     requestAnimationFrame(animate)
     // clear canvas to remove previous position
     c.clearRect(0, 0, canvas.width, canvas.height)
-    // move in here
-    boundaries.forEach((boundary) => {
-    boundary.draw()
 
-    // detect if any boundary is overlapping the player -- circular-to-rectangular collision detection
-    // issue: player position point is directly in the center
-    if (player.position.y - player.radius + player.velocity.y <= boundary.position.y + boundary.height && player.position.x + player.radius + player.velocity.x >= boundary.position.x && player.position.y + player.radius + player.velocity.y >= boundary.position.y && player.position.x - player.radius + player.velocity.x <= boundary.position.x + boundary.width)  // if top of player is overlapping with bottom of boundary
-    // velocity will be negative if moving up
-    {
-        console.log('we are colliding')
-        // stop player when we hit a boundary
-        player.velocity.x = 0
-        player.velocity.y = 0
-    }
-})
-
-player.update()
-// clear before checking to see which keys pressed
-//player.velocity.x = 0
-//player.velocity.y = 0
-
-// move within animate function, not event listener
-// === in JS
+    // move within animate function, not event listener
+    // === in JS
     if (keys.w.pressed && lastKey === 'w') {
         player.velocity.y = -5
     } else if (keys.a.pressed && lastKey === 'a') {
@@ -155,6 +147,30 @@ player.update()
         player.velocity.x = 0
         player.velocity.y = 0
     }
+
+    // move in here
+    boundaries.forEach((boundary) => {
+    boundary.draw()
+
+    // use reusable collision code
+    if (circleToRectangleCollision({
+        circle: player,
+        rectangle: boundary
+    }))
+    {
+        console.log('we are colliding')
+        // stop player when we hit a boundary
+        player.velocity.x = 0
+        player.velocity.y = 0
+    }
+})
+
+player.update()
+// clear before checking to see which keys pressed
+//player.velocity.x = 0
+//player.velocity.y = 0
+
+
 }
 
 animate()
