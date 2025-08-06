@@ -76,7 +76,7 @@ class PowerUp {
     constructor({ position, velocity }) {
         this.position = position
         //this.velocity = velocity      // pellets don't move
-        this.radius = 3
+        this.radius = 8
     }
 
     draw() {
@@ -156,7 +156,7 @@ const ghosts = [
             x: 0,
             y: -Ghost.speed
         },
-        color: 'blue'
+        color: '#00d2ff'
     })
 ]
 
@@ -228,7 +228,7 @@ const map = [
     ['|', ' ', '[', ']', ' ', ' ', ' ', '[', ']', ' ', '|'],
     ['|', ' ', ' ', ' ', ' ', '^', ' ', ' ', ' ', ' ', '|'],
     ['|', ' ', 'o', ' ', '[', '_', ']', ' ', 'o', ' ', '|'],
-    ['|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|'],
+    ['|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'p', '|'],
     ['4', '=', '=', '=', '=', '=', '=', '=', '=', '=', '3']
 ]
 
@@ -409,6 +409,16 @@ map.forEach((row, index) => {
                     })
                 )
                 break
+            case "p":
+                powerups.push(
+                    new PowerUp({
+                        position: {
+                            x: Boundary.width * j + Boundary.width /2,
+                            y: Boundary.height * index + Boundary.height /2     // add this Boundary.__/2 to center pellets
+                        }
+                    })
+                )
+                break
         }
     })
 })
@@ -530,8 +540,14 @@ function animate() {
         player.velocity.y = 0
     }
 
-    // run through loop backwards (prevents flashing)
-    for (let i = pellets.length - 1; 0 < i; i--)
+    // render powerup
+    for (let i = powerups.length - 1; 0 <= i; i--) {
+        const powerup = powerups[i]
+        powerup.draw()
+    }
+
+    // run through loop backwards (prevents flashing/rendering issue)
+    for (let i = pellets.length - 1; 0 <= i; i--)
     {
         const pellet = pellets[i]       // no weird rendering issues
         pellet.draw()
