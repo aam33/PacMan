@@ -31,16 +31,27 @@ class Player {
         this.position = position
         this.velocity = velocity
         this.radius = 15
+        this.radians = 0.75     // open mouth
+        this.openRate = 0.12
+        this.rotation = 0   // facing right by default
     }
 
     draw() {
+        c.save()
+        c.translate(this.position.x, this.position.y)   // rotate from center of Pac-man
+        c.rotate(this.rotation)        // global canvas function
+        // rotate back
+        c.translate(-this.position.x, -this.position.y)
         // beginPath is built-in
         // start at 0
         c.beginPath()
-        c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
+        //c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)    // changing start angle and end angle will not draw full circle!
+        c.arc(this.position.x, this.position.y, this.radius, this.radians, Math.PI * 2 - this.radians)
+        c.lineTo(this.position.x, this.position.y)      // to center of player
         c.fillStyle = 'yellow'
         c.fill()
         c.closePath()
+        c.restore()
     }
 
     // add function called update that will change position
@@ -48,6 +59,11 @@ class Player {
         this.draw()
         this.position.x += this.velocity.x
         this.position.y += this.velocity.y
+
+        // code for opening and closing mouth animation
+        if (this.radians < 0 || this.radians > .75) this.openRate = -this.openRate
+
+        this.radians += this.openRate
     }
 }
 
@@ -101,6 +117,7 @@ class Ghost {
         this.color = color
         this.prevCollisions = []
         this.speed = 2
+        this.scared = false
     }
 
     draw() {
@@ -108,7 +125,7 @@ class Ghost {
         // start at 0
         c.beginPath()
         c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
-        c.fillStyle = this.color
+        c.fillStyle = this.scared ? 'blue' : this.color     // blue if true; else initial color
         c.fill()
         c.closePath()
     }
@@ -540,10 +557,70 @@ function animate() {
         player.velocity.y = 0
     }
 
+    // detect collision between ghosts and player
+    for (let i = ghosts.length - 1; 0 <= i; i--) {      // loop from end of array
+        const ghost = ghosts[i]      // grab a ghost
+        // ghost touches player
+        if (
+            Math.hypot(
+                ghost.position.x - player.position.x,
+                ghost.position.y - player.position.y
+            ) <
+                ghost.radius + player.radius
+        ) {
+            if (ghost.scared) {
+                ghosts.splice(i, 1)    // current index we're looping over; has to be (i, 1) because without the 1 it removes all ghosts from index i to the end of the array (up to 3 ghosts)
+                if (ghosts.length === 2) {
+                    scoreVar += 200
+                    console.log('200 points for 1st ghost')
+                } else if (ghosts.length === 1) {
+                    scoreVar += 400
+                    console.log('400 points for 2nd ghost')
+                } else if (ghosts.length === 0)
+                {
+                    scoreVar += 800
+                    console.log('800 points for 3rd ghost')
+                }
+                score.innerHTML = scoreVar
+            } else {
+                // touch ghost that isn't scared
+                cancelAnimationFrame(animationID)
+                console.log('you lose')
+            }
+        }
+    }
+
+    // win condition
+    if (pellets.length === 0) {
+        cancelAnimationFrame(animationID)
+        console.log('you win!!!!!!!!!!')
+    }
+
     // render powerup
     for (let i = powerups.length - 1; 0 <= i; i--) {
         const powerup = powerups[i]
         powerup.draw()
+
+        // player collides with powerup
+        if (
+            Math.hypot(
+                powerup.position.x - player.position.x,
+                powerup.position.y - player.position.y
+            ) <
+            powerup.radius + player.radius
+        ) {
+            powerups.splice(i, 1)
+
+            // make ghosts scared
+            ghosts.forEach(ghost => {
+                ghost.scared = true
+                
+                setTimeout(() => {
+                    ghost.scared = false
+                    console.log(ghost.scared)
+                }, 4000)       // for 4 seconds
+            })
+        }
     }
 
     // run through loop backwards (prevents flashing/rendering issue)
@@ -587,6 +664,7 @@ function animate() {
 
 player.update()
 
+// ghost touches player while active ghost (not scared)
 ghosts.forEach(ghost => {
     ghost.update()
 
@@ -595,7 +673,7 @@ ghosts.forEach(ghost => {
                 ghost.position.x - player.position.x,
                 ghost.position.y - player.position.y
             ) <
-            ghost.radius + player.radius
+            ghost.radius + player.radius && !ghost.scared       // and ghost not scared
         ) {
             cancelAnimationFrame(animationID)
             console.log('you lose!')
