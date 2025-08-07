@@ -108,10 +108,11 @@ class PowerUp {
     // no update function because they don't move
 }
 
-class Ghost {
+/*class Ghost {
     static speed = 2    // outside constructor
     constructor({ position, velocity, color = 'red' }) {
         this.position = position
+        this.startingPosition = {...position}       // stores starting position, useful for respawn
         this.velocity = velocity
         this.radius = 15
         this.color = color
@@ -136,6 +137,42 @@ class Ghost {
         this.position.x += this.velocity.x
         this.position.y += this.velocity.y
     }
+}*/
+
+class Ghost {
+    static speed = 2    // outside constructor
+    constructor({ position, velocity, image, scaredImage }) {
+        this.position = position
+        this.startingPosition = {...position}       // stores starting position, useful for respawn
+        this.velocity = velocity
+        this.radius = 15
+        //this.color = color
+        this.prevCollisions = []
+        this.speed = 2
+        this.scared = false
+        this.image = image      // passed through constructor
+        this.scaredImage = scaredImage
+    }
+
+    draw() {
+        // beginPath is built-in
+        // start at 0
+        //c.beginPath()
+        //c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
+        //c.fillStyle = this.scared ? 'blue' : this.color     // blue if true; else initial color
+        //c.fill()
+        //c.closePath()
+        //c.drawImage(this.image, this.position.x, this.position.y)
+        const imageToDraw = this.scared ? this.scaredImage : this.image
+        c.drawImage(imageToDraw, this.position.x, this.position.y)
+    }
+
+    // add function called update that will change position
+    update() {
+        this.draw()
+        this.position.x += this.velocity.x
+        this.position.y += this.velocity.y
+    }
 }
 
 // arrays
@@ -151,7 +188,9 @@ const ghosts = [
         velocity: {
             x: Ghost.speed,
             y: 0
-        }
+        },
+        image: createImage('./img/red-ghost.png'),
+        scaredImage: createImage('./img/scared-ghost.png')
     }),
     new Ghost({
         position: {
@@ -162,7 +201,8 @@ const ghosts = [
             x: Ghost.speed,
             y: 0
         },
-        color: 'pink'
+        image: createImage('./img/pink-ghost.png'),
+        scaredImage: createImage('./img/scared-ghost.png')
     }),
     new Ghost({
         position: {
@@ -173,7 +213,8 @@ const ghosts = [
             x: 0,
             y: -Ghost.speed
         },
-        color: '#00d2ff'
+        image: createImage('./img/blue-ghost.png'),
+        scaredImage: createImage('./img/scared-ghost.png')
     })
 ]
 
@@ -230,8 +271,9 @@ const keys = {
 
 // let instead of const
 let lastKey = ''    // empty string by default
-
 let scoreVar = 0;   // default
+let ghostsEatenDuringPowerup = 0       // will come into use later
+
 
 const map = [
     ['1', '=', '=', '=', '=', '=', '=', '=', '=', '=', '2'],
@@ -569,7 +611,7 @@ function animate() {
                 ghost.radius + player.radius
         ) {
             if (ghost.scared) {
-                ghosts.splice(i, 1)    // current index we're looping over; has to be (i, 1) because without the 1 it removes all ghosts from index i to the end of the array (up to 3 ghosts)
+                /*ghosts.splice(i, 1)    // current index we're looping over; has to be (i, 1) because without the 1 it removes all ghosts from index i to the end of the array (up to 3 ghosts)
                 if (ghosts.length === 2) {
                     scoreVar += 200
                     console.log('200 points for 1st ghost')
@@ -581,7 +623,42 @@ function animate() {
                     scoreVar += 800
                     console.log('800 points for 3rd ghost')
                 }
+                score.innerHTML = scoreVar*/
+                const eatenGhost = ghosts.splice(i, 1)[0]
+
+                ghostsEatenDuringPowerup++
+
+                switch (ghostsEatenDuringPowerup) {
+                    case 1:
+                        scoreVar += 200
+                        break
+                    case 2:
+                        scoreVar += 400
+                        break
+                    case 3:
+                        scoreVar += 800
+                        break
+                    case 4:     // this condition will never be hit unless I add another ghost
+                        scoreVar += 1600
+                        break
+                }
+
                 score.innerHTML = scoreVar
+
+                // respawn after delay
+                eatenGhost.velocity = {x: 0, y: 0 }     // stop movement of eaten ghost
+                setTimeout(() => {
+                    eatenGhost.position = {...eatenGhost.startingPosition}
+                    eatenGhost.scared = false
+                    eatenGhost.prevCollisions = []
+                    if (eatenGhost.image === './img/blue-ghost.png')
+                    {
+                        eatenGhost.velocity = { x: 0, y: -eatenGhost.speed }
+                    } else {
+                        eatenGhost.velocity = { x: eatenGhost.speed, y: 0 }
+                    }
+                    ghosts.push(eatenGhost)
+                }, 4000)
             } else {
                 // touch ghost that isn't scared
                 cancelAnimationFrame(animationID)
@@ -610,6 +687,7 @@ function animate() {
             powerup.radius + player.radius
         ) {
             powerups.splice(i, 1)
+            ghostsEatenDuringPowerup = 0    // reset counter as soon as a powerup is collected
 
             // make ghosts scared
             ghosts.forEach(ghost => {
