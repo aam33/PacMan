@@ -145,7 +145,7 @@ class Ghost {
         this.position = position
         this.startingPosition = {...position}       // stores starting position, useful for respawn
         this.velocity = velocity
-        this.radius = 15
+        this.radius = 12
         //this.color = color
         this.prevCollisions = []
         this.speed = 2
@@ -164,7 +164,12 @@ class Ghost {
         //c.closePath()
         //c.drawImage(this.image, this.position.x, this.position.y)
         const imageToDraw = this.scared ? this.scaredImage : this.image
-        c.drawImage(imageToDraw, this.position.x, this.position.y)
+        //c.drawImage(imageToDraw, this.position.x, this.position.y)      // this line draws the image with the top-left corner at this.position.x, this.position.y
+        c.drawImage(
+            imageToDraw,
+            this.position.x - imageToDraw.width / 2,
+            this.position.y - imageToDraw.height / 2
+        )       // this block should center the center of the sprite at this.position.x, this.position.y
     }
 
     // add function called update that will change position
@@ -172,6 +177,9 @@ class Ghost {
         this.draw()
         this.position.x += this.velocity.x
         this.position.y += this.velocity.y
+
+        // test
+        this.radius = Math.abs(this.velocity.x) > 0 ? 11 : 13
     }
 }
 
@@ -189,8 +197,8 @@ const ghosts = [
             x: Ghost.speed,
             y: 0
         },
-        image: createImage('./img/red-ghost.png'),
-        scaredImage: createImage('./img/scared-ghost.png')
+        image: createImage('./img/red-ghost-transparent.png'),
+        scaredImage: createImage('./img/scared-ghost-transparent.png')
     }),
     new Ghost({
         position: {
@@ -201,8 +209,8 @@ const ghosts = [
             x: Ghost.speed,
             y: 0
         },
-        image: createImage('./img/pink-ghost.png'),
-        scaredImage: createImage('./img/scared-ghost.png')
+        image: createImage('./img/pink-ghost-transparent.png'),
+        scaredImage: createImage('./img/scared-ghost-transparent.png')
     }),
     new Ghost({
         position: {
@@ -213,8 +221,8 @@ const ghosts = [
             x: 0,
             y: -Ghost.speed
         },
-        image: createImage('./img/blue-ghost.png'),
-        scaredImage: createImage('./img/scared-ghost.png')
+        image: createImage('./img/blue-ghost-transparent.png'),
+        scaredImage: createImage('./img/scared-ghost-transparent.png')
     })
 ]
 
@@ -597,11 +605,17 @@ function animate() {
         // pause if spacebar pressed
         player.velocity.x = 0
         player.velocity.y = 0
+
+        ghosts.forEach(ghost => {
+            ghost.velocity.x = 0
+            ghost.velocity.y = 0
+        })
     }
 
     // detect collision between ghosts and player
     for (let i = ghosts.length - 1; 0 <= i; i--) {      // loop from end of array
         const ghost = ghosts[i]      // grab a ghost
+        ghost.radius = Math.abs(ghost.velocity.x) > 0 ? 11 : 13     //"radius" is 11 if moving in x direction; 13 if moving in y direction
         // ghost touches player
         if (
             Math.hypot(
@@ -611,19 +625,8 @@ function animate() {
                 ghost.radius + player.radius
         ) {
             if (ghost.scared) {
-                /*ghosts.splice(i, 1)    // current index we're looping over; has to be (i, 1) because without the 1 it removes all ghosts from index i to the end of the array (up to 3 ghosts)
-                if (ghosts.length === 2) {
-                    scoreVar += 200
-                    console.log('200 points for 1st ghost')
-                } else if (ghosts.length === 1) {
-                    scoreVar += 400
-                    console.log('400 points for 2nd ghost')
-                } else if (ghosts.length === 0)
-                {
-                    scoreVar += 800
-                    console.log('800 points for 3rd ghost')
-                }
-                score.innerHTML = scoreVar*/
+                //ghosts.splice(i, 1)    // current index we're looping over; has to be (i, 1) because without the 1 it removes all ghosts from index i to the end of the array (up to 3 ghosts)
+
                 const eatenGhost = ghosts.splice(i, 1)[0]
 
                 ghostsEatenDuringPowerup++
@@ -651,7 +654,7 @@ function animate() {
                     eatenGhost.position = {...eatenGhost.startingPosition}
                     eatenGhost.scared = false
                     eatenGhost.prevCollisions = []
-                    if (eatenGhost.image === './img/blue-ghost.png')
+                    if (eatenGhost.image === './img/blue-ghost-transparent.png')
                     {
                         eatenGhost.velocity = { x: 0, y: -eatenGhost.speed }
                     } else {
