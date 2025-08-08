@@ -141,7 +141,8 @@ class PowerUp {
 
 class Ghost {
     static speed = 2    // outside constructor
-    constructor({ position, velocity, image, scaredImage }) {
+    constructor({ name, position, velocity, image, scaredImage }) {
+        this.name = name
         this.position = position
         this.startingPosition = {...position}       // stores starting position, useful for respawn
         this.velocity = velocity
@@ -189,6 +190,7 @@ const boundaries = []
 const powerups = []
 const ghosts = [
     new Ghost({
+        name: 'red',
         position: {
             x: Boundary.width * 6 + Boundary.width / 2,
             y: Boundary.height + Boundary.height / 2
@@ -201,6 +203,7 @@ const ghosts = [
         scaredImage: createImage('./img/scared-ghost-transparent.png')
     }),
     new Ghost({
+        name: 'pink',
         position: {
             x: Boundary.width * 6 + Boundary.width / 2,
             y: Boundary.height * 3 + Boundary.height / 2
@@ -213,6 +216,7 @@ const ghosts = [
         scaredImage: createImage('./img/scared-ghost-transparent.png')
     }),
     new Ghost({
+        name: 'blue',
         position: {
             x: Boundary.width * 4 + Boundary.width / 2,
             y: Boundary.height * 9 + Boundary.height / 2
@@ -654,12 +658,16 @@ function animate() {
                     eatenGhost.position = {...eatenGhost.startingPosition}
                     eatenGhost.scared = false
                     eatenGhost.prevCollisions = []
-                    if (eatenGhost.image === './img/blue-ghost-transparent.png')
-                    {
-                        eatenGhost.velocity = { x: 0, y: -eatenGhost.speed }
-                    } else {
-                        eatenGhost.velocity = { x: eatenGhost.speed, y: 0 }
-                    }
+                    // pause after respawn?
+                    eatenGhost.velocity = { x: 0, y: 0 }
+                    setTimeout(() => {
+                        if (eatenGhost.name === 'blue')
+                        {
+                            eatenGhost.velocity = { x: 0, y: -eatenGhost.speed }
+                        } else {
+                            eatenGhost.velocity = { x: eatenGhost.speed, y: 0 }
+                        }
+                    }, 500)
                     ghosts.push(eatenGhost)
                 }, 4000)
             } else {
