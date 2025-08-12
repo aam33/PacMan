@@ -153,6 +153,7 @@ class Ghost {
         this.scared = false
         this.image = image      // passed through constructor
         this.scaredImage = scaredImage
+        this.state = 'inGhostBox'   // options: 'moveHorizontal', 'moveUp', 'pause', 'normal'
     }
 
     draw() {
@@ -182,6 +183,12 @@ class Ghost {
         // test
         this.radius = Math.abs(this.velocity.x) > 0 ? 11 : 13
     }
+
+    setupGhostExit() {
+        if (this.name === 'blue') {
+            this
+        }
+    }
 }
 
 // arrays
@@ -192,11 +199,14 @@ const ghosts = [
     new Ghost({
         name: 'red',
         position: {
-            x: Boundary.width * 6 + Boundary.width / 2,
-            y: Boundary.height + Boundary.height / 2
+            //x: Boundary.width * 6 + Boundary.width / 2,
+            //y: Boundary.height + Boundary.height / 2
+            x: Boundary.width * 5 + Boundary.width / 2,
+            y: Boundary.height * 6 + Boundary.height / 2
         },
         velocity: {
-            x: Ghost.speed,
+            //x: Ghost.speed,
+            x: 0,
             y: 0
         },
         image: createImage('./img/red-ghost-transparent.png'),
@@ -206,10 +216,12 @@ const ghosts = [
         name: 'pink',
         position: {
             x: Boundary.width * 6 + Boundary.width / 2,
-            y: Boundary.height * 3 + Boundary.height / 2
+            //y: Boundary.height * 3 + Boundary.height / 2
+            y: Boundary.height * 6 + Boundary.height / 2
         },
         velocity: {
-            x: Ghost.speed,
+            //x: Ghost.speed,
+            x: 0,
             y: 0
         },
         image: createImage('./img/pink-ghost-transparent.png'),
@@ -218,12 +230,15 @@ const ghosts = [
     new Ghost({
         name: 'blue',
         position: {
+            //x: Boundary.width * 4 + Boundary.width / 2,
+            //y: Boundary.height * 9 + Boundary.height / 2
             x: Boundary.width * 4 + Boundary.width / 2,
-            y: Boundary.height * 9 + Boundary.height / 2
+            y: Boundary.height * 6 + Boundary.height / 2
         },
         velocity: {
             x: 0,
-            y: -Ghost.speed
+            //y: -Ghost.speed
+            y: 0
         },
         image: createImage('./img/blue-ghost-transparent.png'),
         scaredImage: createImage('./img/scared-ghost-transparent.png')
@@ -291,13 +306,13 @@ const map = [
     ['1', '=', '=', '=', '=', '=', '=', '=', '=', '=', '2'],
     ['|', 'q', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|'],
     ['|', ' ', 'o', ' ', '[', 't', ']', ' ', 'o', ' ', '|'],
-    ['|', ' ', ' ', ' ', ' ', 'u', ' ', ' ', ' ', ' ', '|'],
-    ['|', ' ', '[', ']', ' ', ' ', ' ', '[', ']', ' ', '|'],
-    ['|', ' ', ' ', ' ', ' ', 'n', ' ', ' ', ' ', ' ', '|'],
-    ['|', ' ', 'o', ' ', '[', 'x', ']', ' ', 'o', ' ', '|'],
-    ['|', ' ', ' ', ' ', ' ', 'u', ' ', ' ', ' ', ' ', '|'],
-    ['|', ' ', '[', ']', ' ', ' ', ' ', '[', ']', ' ', '|'],
-    ['|', ' ', ' ', ' ', ' ', 'n', ' ', ' ', ' ', ' ', '|'],
+    ['|', ' ', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', '|'],
+    ['|', ' ', '[', ']', ' ', 'u', ' ', '[', ']', ' ', '|'],
+    ['|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|'],
+    ['|', ' ', 'o', ' ', 'a', 'b', 'c', ' ', 'o', ' ', '|'],
+    ['|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|'],
+    ['|', ' ', '[', ']', ' ', 'n', ' ', '[', ']', ' ', '|'],
+    ['|', ' ', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', '|'],
     ['|', ' ', 'o', ' ', '[', '_', ']', ' ', 'o', ' ', '|'],
     ['|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'p', '|'],
     ['4', '=', '=', '=', '=', '=', '=', '=', '=', '=', '3']
@@ -487,6 +502,39 @@ map.forEach((row, index) => {
                             x: Boundary.width * j + Boundary.width /2,
                             y: Boundary.height * index + Boundary.height /2     // add this Boundary.__/2 to center pellets
                         }
+                    })
+                )
+                break
+            case "a":
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * index
+                        },
+                        image: createImage('./img/capLeft.png')
+                    })
+                )
+                break
+            case "c":
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * index
+                        },
+                        image: createImage('./img/capRight.png')
+                    })
+                )
+                break
+            case "b":
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * index
+                        },
+                        image: createImage('./img/pipeConnectorTop.png')
                     })
                 )
                 break
