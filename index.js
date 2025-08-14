@@ -182,7 +182,7 @@ class Ghost {
         this.position.y += this.velocity.y
 
         // test
-        this.radius = Math.abs(this.velocity.x) > 0 ? 11 : 13
+        this.radius = Math.abs(this.velocity.x) > 0 ? 11 : 14
     }
 }
 
@@ -699,7 +699,7 @@ function animate() {
     // detect collision between ghosts and player
     for (let i = ghosts.length - 1; 0 <= i; i--) {      // loop from end of array
         const ghost = ghosts[i]      // grab a ghost
-        ghost.radius = Math.abs(ghost.velocity.x) > 0 ? 11 : 13     //"radius" is 11 if moving in x direction; 13 if moving in y direction
+        ghost.radius = Math.abs(ghost.velocity.x) > 0 ? 11 : 14     //"radius" is 11 if moving in x direction; 14 if moving in y direction
         // ghost touches player
         if (
             Math.hypot(
@@ -882,7 +882,8 @@ function GhostMovement() {
 
         if (ghost.state === 'normal') {    
             //ghost.velocity.x = ghost.speed
-            //ghost.velocity.y = 0    
+            //ghost.velocity.y = 0
+            ghost.radius = Math.abs(ghost.velocity.x) > 0 ? 11 : 14    
             if (
                     Math.hypot(
                         ghost.position.x - player.position.x,
