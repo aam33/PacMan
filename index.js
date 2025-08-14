@@ -11,11 +11,12 @@ canvas.height = innerHeight
 class Boundary {
     static width = 40
     static height = 40
-    constructor({position, image}) {
+    constructor({position, image, type = 'wall'}) {
         this.position = position
         this.width = 40
         this.height = 40
         this.image = image      // passed through constructor
+        this.type = type
     }
 
     draw() {
@@ -141,7 +142,7 @@ class PowerUp {
 
 class Ghost {
     static speed = 2    // outside constructor
-    constructor({ name, position, velocity, image, scaredImage }) {
+    constructor({ name, position, velocity, image, scaredImage, state }) {
         this.name = name
         this.position = position
         this.startingPosition = {...position}       // stores starting position, useful for respawn
@@ -153,7 +154,7 @@ class Ghost {
         this.scared = false
         this.image = image      // passed through constructor
         this.scaredImage = scaredImage
-        this.state = 'inGhostBox'   // options: 'moveHorizontal', 'moveUp', 'pause', 'normal'
+        this.state = state   // options: 'moveHorizontal', 'moveUp', 'normal'
     }
 
     draw() {
@@ -183,12 +184,6 @@ class Ghost {
         // test
         this.radius = Math.abs(this.velocity.x) > 0 ? 11 : 13
     }
-
-    setupGhostExit() {
-        if (this.name === 'blue') {
-            this
-        }
-    }
 }
 
 // arrays
@@ -207,10 +202,11 @@ const ghosts = [
         velocity: {
             //x: Ghost.speed,
             x: 0,
-            y: 0
+            y: -Ghost.speed
         },
         image: createImage('./img/red-ghost-transparent.png'),
-        scaredImage: createImage('./img/scared-ghost-transparent.png')
+        scaredImage: createImage('./img/scared-ghost-transparent.png'),
+        state: 'moveUp'
     }),
     new Ghost({
         name: 'pink',
@@ -221,11 +217,12 @@ const ghosts = [
         },
         velocity: {
             //x: Ghost.speed,
-            x: 0,
+            x: -Ghost.speed,
             y: 0
         },
         image: createImage('./img/pink-ghost-transparent.png'),
-        scaredImage: createImage('./img/scared-ghost-transparent.png')
+        scaredImage: createImage('./img/scared-ghost-transparent.png'),
+        state: 'moveHorizontal'
     }),
     new Ghost({
         name: 'blue',
@@ -236,12 +233,13 @@ const ghosts = [
             y: Boundary.height * 6 + Boundary.height / 2
         },
         velocity: {
-            x: 0,
+            x: Ghost.speed,
             //y: -Ghost.speed
             y: 0
         },
         image: createImage('./img/blue-ghost-transparent.png'),
-        scaredImage: createImage('./img/scared-ghost-transparent.png')
+        scaredImage: createImage('./img/scared-ghost-transparent.png'),
+        state: 'moveHorizontal'
     })
 ]
 
@@ -307,7 +305,7 @@ const map = [
     ['|', 'q', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|'],
     ['|', ' ', 'o', ' ', '[', 't', ']', ' ', 'o', ' ', '|'],
     ['|', ' ', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', '|'],
-    ['|', ' ', '[', ']', ' ', 'u', ' ', '[', ']', ' ', '|'],
+    ['|', ' ', '[', ']', ' ', 'v', ' ', '[', ']', ' ', '|'],
     ['|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|'],
     ['|', ' ', 'o', ' ', 'a', 'b', 'c', ' ', 'o', ' ', '|'],
     ['|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|'],
@@ -512,7 +510,8 @@ map.forEach((row, index) => {
                             x: Boundary.width * j,
                             y: Boundary.height * index
                         },
-                        image: createImage('./img/capLeft.png')
+                        image: createImage('./img/capLeft.png'),
+                        type: 'ghostBox'
                     })
                 )
                 break
@@ -523,7 +522,8 @@ map.forEach((row, index) => {
                             x: Boundary.width * j,
                             y: Boundary.height * index
                         },
-                        image: createImage('./img/capRight.png')
+                        image: createImage('./img/capRight.png'),
+                        type: 'ghostBox'
                     })
                 )
                 break
@@ -534,7 +534,20 @@ map.forEach((row, index) => {
                             x: Boundary.width * j,
                             y: Boundary.height * index
                         },
-                        image: createImage('./img/pipeConnectorTop.png')
+                        image: createImage('./img/pipeConnectorTop.png'),
+                        type: 'ghostBox'
+                    })
+                )
+                break
+            case "v":
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * index
+                        },
+                        image: createImage('./img/capBottom.png'),
+                        type: 'aboveWall'
                     })
                 )
                 break
@@ -556,6 +569,20 @@ function circleToRectangleCollision({
         // if top of player is overlapping with bottom of boundary, etc.
     )
 }
+
+function setupForExit(ghost) {
+    if (ghost.name === 'blue') {
+        ghost.state = 'moveHorizontal'
+        ghost.velocity = { x: ghost.speed, y: 0 }
+    } else if (ghost.name === 'red') {
+        ghost.state = 'moveUp'
+        ghost.velocity = { x: 0, y: -ghost.speed }
+    } else if (ghost.name === 'pink') {
+        ghost.state = 'moveHorizontal'
+        ghost.velocity = { x: -ghost.speed, y: 0 }
+    }
+}
+
 
 // animation ID
 let animationID
@@ -662,6 +689,11 @@ function animate() {
             ghost.velocity.x = 0
             ghost.velocity.y = 0
         })
+
+        cancelAnimationFrame(animationID)
+        ghosts.forEach(ghost => {
+            console.log(ghost.state)
+        })
     }
 
     // detect collision between ghosts and player
@@ -709,12 +741,13 @@ function animate() {
                     // pause after respawn?
                     eatenGhost.velocity = { x: 0, y: 0 }
                     setTimeout(() => {
-                        if (eatenGhost.name === 'blue')
+                        setupForExit(eatenGhost)
+                        /*if (eatenGhost.name === 'blue')
                         {
                             eatenGhost.velocity = { x: 0, y: -eatenGhost.speed }
                         } else {
                             eatenGhost.velocity = { x: eatenGhost.speed, y: 0 }
-                        }
+                        }*/
                     }, 500)
                     ghosts.push(eatenGhost)
                 }, 4000)
@@ -792,7 +825,7 @@ function animate() {
         rectangle: boundary
     }))
     {
-        console.log('we are colliding')
+        console.log('player colliding with boundary')
         // stop player when we hit a boundary
         player.velocity.x = 0
         player.velocity.y = 0
@@ -801,138 +834,190 @@ function animate() {
 
 player.update()
 
-// ghost touches player while active ghost (not scared)
-ghosts.forEach(ghost => {
-    ghost.update()
+// commented out so that this isn't called every frame
+/*ghosts.forEach(ghost => {
+    setupForExit(ghost);
+})*/
 
-    if (
-            Math.hypot(
-                ghost.position.x - player.position.x,
-                ghost.position.y - player.position.y
-            ) <
-            ghost.radius + player.radius && !ghost.scared       // and ghost not scared
-        ) {
-            cancelAnimationFrame(animationID)
-            console.log('you lose!')
-        }
+function GhostMovement() {
+    
+    // ghost logic
+    ghosts.forEach(ghost => {
 
-    // collisions array
-    const collisions = []
-    // detect boundaries
-    boundaries.forEach(boundary => {
-        if (
-            !collisions.includes('right') &&
-            circleToRectangleCollision({
-                circle: {
-                    ...ghost,
-                    velocity: {
-                        x: ghost.speed,
-                        y: 0
-                    }
-                },
-                rectangle: boundary
-            })
-        ) {
-            collisions.push('right')
-        }
-
-        if (
-            !collisions.includes('left') &&
-            circleToRectangleCollision({
-                circle: {
-                    ...ghost,
-                    velocity: {
-                        x: -5,
-                        y: 0
-                    }
-                },
-                rectangle: boundary
-            })
-        ) {
-            collisions.push('left')
-        }
-
-        if (
-            !collisions.includes('up') &&
-            circleToRectangleCollision({
-                circle: {
-                    ...ghost,
-                    velocity: {
-                        x: 0,
-                        y: -5
-                    }
-                },
-                rectangle: boundary
-            })
-        ) {
-            collisions.push('up')
-        }
-
-        if (
-            !collisions.includes('down') &&
-            circleToRectangleCollision({
-                circle: {
-                    ...ghost,
-                    velocity: {
-                        x: 0,
-                        y: 5
-                    }
-                },
-                rectangle: boundary
-            })
-        ) {
-            collisions.push('down')
-        }
-    })
-
-    if (collisions.length > ghost.prevCollisions.length)
-        ghost.prevCollisions = collisions
-
-    if (JSON.stringify(collisions) !== JSON.stringify(ghost.prevCollisions)) {
-        console.log('gogo')
-
-        if (ghost.velocity.x > 0) ghost.prevCollisions.push('right')
-        else if (ghost.velocity.x < 0) ghost.prevCollisions.push('left')
-        else if (ghost.velocity.y < 0) ghost.prevCollisions.push('up')
-        else if (ghost.velocity.y > 0) ghost.prevCollisions.push('down')
-
-        console.log(collisions)
-        console.log(ghost.prevCollisions)
-
-        const pathways = ghost.prevCollisions.filter(collision => {
-            return !collisions.includes(collision)
-        })
-        console.log({pathways})
-
-        // choose random path from pathways array
-        const direction = pathways[Math.floor(Math.random() * pathways.length)]
-
-        console.log({direction})
-
-        switch (direction) {
-            case 'down':
-                ghost.velocity.y = ghost.speed
+        if (ghost.state === 'moveHorizontal') {
+            // detect when position is at door
+            // change state to moveUp
+            if ((ghost.position.x >= Boundary.width * 5 + Boundary.width / 2 && ghost.name === 'blue') || (ghost.position.x <= Boundary.width * 5 + Boundary.width / 2 && ghost.name === 'pink')) {
+                ghost.state = 'moveUp'
                 ghost.velocity.x = 0
-                break
-            case 'up':
                 ghost.velocity.y = -ghost.speed
-                ghost.velocity.x = 0
-                break
-            case 'right':
-                ghost.velocity.y = 0
-                ghost.velocity.x = ghost.speed
-                break
-            case 'left':
-                ghost.velocity.y = 0
-                ghost.velocity.x = -ghost.speed
-                break
+                //console.log ('working and ghosts stopped')
+            }
         }
 
-        // reset collision
-        ghost.prevCollisions = []
-    }
-    //console.log(collisions)
-})
+        if (ghost.state === 'moveUp') {
+            // detect where type === 'wall'
+            const aboveWall = boundaries.find(wall => wall.type === 'aboveWall')
+            if (circleToRectangleCollision({
+                circle: {...ghost},
+                rectangle: aboveWall
+            })) {
+                ghost.velocity.x = 0
+                ghost.velocity.y = 0
+                //ghost.state = 'normal'
+                //ghost.velocity.x = ghost.speed
+                //ghost.velocity.y = 0
+                /*setTimeout(() => {
+                    ghost.state = 'normal'
+                }, 500)*/
+                ghost.state = 'normal'
+                setTimeout(() => {
+                    ghost.velocity.x = ghost.speed
+                    ghost.velocity.y = 0
+                    ghost.prevCollisions = ['up', 'down', 'left', 'right'] // Reset collisions so movement logic works
+                }, 250)
+                console.log(`state of ${ghost.name} is ${ghost.state}`, ghost.name, ghost.state)
+            }
+        }
+
+        if (ghost.state === 'normal') {    
+            //ghost.velocity.x = ghost.speed
+            //ghost.velocity.y = 0    
+            if (
+                    Math.hypot(
+                        ghost.position.x - player.position.x,
+                        ghost.position.y - player.position.y
+                    ) <
+                    ghost.radius + player.radius && !ghost.scared       // and ghost not scared
+                ) {
+                    cancelAnimationFrame(animationID)
+                    console.log('you lose!')
+                }
+
+            // collisions array
+            const collisions = []
+            // detect boundaries
+            boundaries.forEach(boundary => {
+                if (
+                    !collisions.includes('right') &&
+                    circleToRectangleCollision({
+                        circle: {
+                            ...ghost,
+                            velocity: {
+                                x: ghost.speed,
+                                y: 0
+                            }
+                        },
+                        rectangle: boundary
+                    })
+                ) {
+                    collisions.push('right')
+                }
+
+                if (
+                    !collisions.includes('left') &&
+                    circleToRectangleCollision({
+                        circle: {
+                            ...ghost,
+                            velocity: {
+                                x: -5,
+                                y: 0
+                            }
+                        },
+                        rectangle: boundary
+                    })
+                ) {
+                    collisions.push('left')
+                }
+
+                if (
+                    !collisions.includes('up') &&
+                    circleToRectangleCollision({
+                        circle: {
+                            ...ghost,
+                            velocity: {
+                                x: 0,
+                                y: -5
+                            }
+                        },
+                        rectangle: boundary
+                    })
+                ) {
+                    collisions.push('up')
+                }
+
+                if (
+                    !collisions.includes('down') &&
+                    circleToRectangleCollision({
+                        circle: {
+                            ...ghost,
+                            velocity: {
+                                x: 0,
+                                y: 5
+                            }
+                        },
+                        rectangle: boundary
+                    })
+                ) {
+                    collisions.push('down')
+                }
+            })
+
+            if (collisions.length > ghost.prevCollisions.length)
+                ghost.prevCollisions = collisions
+
+            if (JSON.stringify(collisions) !== JSON.stringify(ghost.prevCollisions)) {
+                console.log('gogo')
+
+                if (ghost.velocity.x > 0) ghost.prevCollisions.push('right')
+                else if (ghost.velocity.x < 0) ghost.prevCollisions.push('left')
+                else if (ghost.velocity.y < 0) ghost.prevCollisions.push('up')
+                else if (ghost.velocity.y > 0) ghost.prevCollisions.push('down')
+
+                console.log(collisions)
+                console.log(ghost.prevCollisions)
+
+                const pathways = ghost.prevCollisions.filter(collision => {
+                    return !collisions.includes(collision)
+                })
+                console.log({pathways})
+
+                // choose random path from pathways array
+                const direction = pathways[Math.floor(Math.random() * pathways.length)]
+
+                console.log({direction})
+
+                switch (direction) {
+                    case 'down':
+                        ghost.velocity.y = ghost.speed
+                        ghost.velocity.x = 0
+                        break
+                    case 'up':
+                        ghost.velocity.y = -ghost.speed
+                        ghost.velocity.x = 0
+                        break
+                    case 'right':
+                        ghost.velocity.y = 0
+                        ghost.velocity.x = ghost.speed
+                        break
+                    case 'left':
+                        ghost.velocity.y = 0
+                        ghost.velocity.x = -ghost.speed
+                        break
+                }
+
+                // reset collision
+                ghost.prevCollisions = []
+            }
+            //console.log(collisions)
+        }
+
+        ghost.update()  // always draw
+        
+    })
+}
+
+GhostMovement()
 
 // proper rotation
 if (player.velocity.x > 0) player.rotation = 0
