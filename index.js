@@ -204,7 +204,7 @@ const ghosts = [
             x: 0,
             y: -Ghost.speed
         },
-        image: createImage('./img/red-ghost-transparent.png'),
+        image: createImage('./img/red-ghost-transparent-up.png'),
         scaredImage: createImage('./img/scared-ghost-transparent.png'),
         state: 'moveUp'
     }),
@@ -220,7 +220,7 @@ const ghosts = [
             x: -Ghost.speed,
             y: 0
         },
-        image: createImage('./img/pink-ghost-transparent.png'),
+        image: createImage('./img/pink-ghost-transparent-up.png'),
         scaredImage: createImage('./img/scared-ghost-transparent.png'),
         state: 'moveHorizontal'
     }),
@@ -237,7 +237,7 @@ const ghosts = [
             //y: -Ghost.speed
             y: 0
         },
-        image: createImage('./img/blue-ghost-transparent.png'),
+        image: createImage('./img/blue-ghost-transparent-up.png'),
         scaredImage: createImage('./img/scared-ghost-transparent.png'),
         state: 'moveHorizontal'
     })
@@ -694,6 +694,9 @@ function animate() {
         ghosts.forEach(ghost => {
             console.log(ghost.state)
         })
+
+        const modal = document.getElementById('pause-modal')
+        modal.style.display = 'block'
     }
 
     // detect collision between ghosts and player
@@ -754,7 +757,12 @@ function animate() {
             } else {
                 // touch ghost that isn't scared
                 cancelAnimationFrame(animationID)
-                console.log('you lose')
+                console.log('you lose!')
+                const modal = document.getElementById('modal');
+                if (modal) {
+                    modal.querySelector('.modal-message').textContent = 'You Lose!';
+                    modal.style.display = 'flex';
+                }
             }
         }
     }
@@ -763,6 +771,11 @@ function animate() {
     if (pellets.length === 0) {
         cancelAnimationFrame(animationID)
         console.log('you win!!!!!!!!!!')
+        const modal = document.getElementById('modal');
+        if (modal) {
+            modal.querySelector('.modal-message').textContent = 'You Win!';
+            modal.style.display = 'flex';
+        }
     }
 
     // render powerup
@@ -907,7 +920,7 @@ function GhostMovement() {
                             velocity: {
                                 x: ghost.speed,
                                 y: 0
-                            }
+                            }   
                         },
                         rectangle: boundary
                     })
@@ -992,18 +1005,30 @@ function GhostMovement() {
                     case 'down':
                         ghost.velocity.y = ghost.speed
                         ghost.velocity.x = 0
+                        if (ghost.name === 'red') ghost.image = createImage('./img/red-ghost-transparent-down.png')
+                        else if (ghost.name === 'pink') ghost.image = createImage('./img/pink-ghost-transparent-down.png')
+                        else if (ghost.name === 'blue') ghost.image = createImage('./img/blue-ghost-transparent-down.png')
                         break
                     case 'up':
                         ghost.velocity.y = -ghost.speed
                         ghost.velocity.x = 0
+                        if (ghost.name === 'red') ghost.image = createImage('./img/red-ghost-transparent-up.png')
+                        else if (ghost.name === 'pink') ghost.image = createImage('./img/pink-ghost-transparent-up.png')
+                        else if (ghost.name === 'blue') ghost.image = createImage('./img/blue-ghost-transparent-up.png')
                         break
                     case 'right':
                         ghost.velocity.y = 0
                         ghost.velocity.x = ghost.speed
+                        if (ghost.name === 'red') ghost.image = createImage('./img/red-ghost-transparent-right.png')
+                        else if (ghost.name === 'pink') ghost.image = createImage('./img/pink-ghost-transparent-right.png')
+                        else if (ghost.name === 'blue') ghost.image = createImage('./img/blue-ghost-transparent-right.png')
                         break
                     case 'left':
                         ghost.velocity.y = 0
                         ghost.velocity.x = -ghost.speed
+                        if (ghost.name === 'red') ghost.image = createImage('./img/red-ghost-transparent-left.png')
+                        else if (ghost.name === 'pink') ghost.image = createImage('./img/pink-ghost-transparent-left.png')
+                        else if (ghost.name === 'blue') ghost.image = createImage('./img/blue-ghost-transparent-left.png')
                         break
                 }
 
