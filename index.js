@@ -150,8 +150,8 @@ class Ghost {
         this.radius = 12
         //this.color = color
         this.prevCollisions = []
-        this.speed = 2
         this.scared = false
+        this.speed = this.scared ? 1 : 2
         this.image = image      // passed through constructor
         this.scaredImage = scaredImage
         this.state = state   // options: 'moveHorizontal', 'moveUp', 'normal'
@@ -187,6 +187,7 @@ class Ghost {
 }
 
 // arrays
+const modal = document.getElementById('pause-modal')
 const pellets = []
 const boundaries = []
 const powerups = []
@@ -695,7 +696,7 @@ function animate() {
             console.log(ghost.state)
         })
 
-        const modal = document.getElementById('pause-modal')
+        //const modal = document.getElementById('pause-modal')
         modal.style.display = 'block'
     }
 
@@ -741,6 +742,7 @@ function animate() {
                     eatenGhost.position = {...eatenGhost.startingPosition}
                     eatenGhost.scared = false
                     eatenGhost.prevCollisions = []
+                    eatenGhost.speed = 2    // reset speed to normal
                     // pause after respawn?
                     eatenGhost.velocity = { x: 0, y: 0 }
                     setTimeout(() => {
@@ -797,11 +799,13 @@ function animate() {
             // make ghosts scared
             ghosts.forEach(ghost => {
                 ghost.scared = true
-                
+                ghost.speed = 1     // scared ghosts should slow down
+
                 setTimeout(() => {
                     ghost.scared = false
+                    ghost.speed = 2    // reset speed to normal
                     console.log(ghost.scared)
-                }, 4000)       // for 4 seconds
+                }, 6000)       // for 4 seconds
             })
         }
     }
