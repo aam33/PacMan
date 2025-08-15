@@ -297,9 +297,9 @@ const keys = {
 
 // let instead of const
 let lastKey = ''    // empty string by default
-let scoreVar = 0;   // default
+let scoreVar = 0    // default
 let ghostsEatenDuringPowerup = 0       // will come into use later
-
+let livesRemaining = 3
 
 const map = [
     ['1', '=', '=', '=', '=', '=', '=', '=', '=', '=', '2'],
@@ -595,6 +595,7 @@ function animate() {
     // clear canvas to remove previous position
     c.clearRect(0, 0, canvas.width, canvas.height)
 
+    
     // move within animate function, not event listener
     // === in JS
     // predict collision before it happens
@@ -759,12 +760,14 @@ function animate() {
             } else {
                 // touch ghost that isn't scared
                 cancelAnimationFrame(animationID)
-                console.log('you lose!')
-                const modal = document.getElementById('modal');
+                //console.log('you lose!')
+                //livesRemaining -= 1
+                //document.getElementById('lives').innerText = livesRemaining
+                /*const modal = document.getElementById('modal');
                 if (modal) {
                     modal.querySelector('.modal-message').textContent = 'You Lose!';
                     modal.style.display = 'flex';
-                }
+                }*/
             }
         }
     }
@@ -805,7 +808,7 @@ function animate() {
                     ghost.scared = false
                     ghost.speed = 2    // reset speed to normal
                     console.log(ghost.scared)
-                }, 6000)       // for 4 seconds
+                }, 2000)       // for 2 seconds
             })
         }
     }
@@ -909,7 +912,9 @@ function GhostMovement() {
                     ghost.radius + player.radius && !ghost.scared       // and ghost not scared
                 ) {
                     cancelAnimationFrame(animationID)
-                    console.log('you lose!')
+                    //console.log('you lose!')
+                    livesRemaining -= 1
+                    document.getElementById('lives').innerText = livesRemaining
                 }
 
             // collisions array
