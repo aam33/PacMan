@@ -607,28 +607,28 @@ function animate() {
             if (circleToRectangleCollision({
                 circle: {...player, velocity: {
                     x: 0,
-                    y: -5
+                    y: -4
                 }},        // spread operator is ... and it allows us to edit a property
                 rectangle: boundary
             })) {
                 player.velocity.y = 0       // colliding
                 break
             } else {
-                player.velocity.y = -5
+                player.velocity.y = -4
             }
         }
         /*boundaries.forEach((boundary) => {
             if (circleToRectangleCollision({
                 circle: {...player, velocity: {
                     x: 0,
-                    y: -5
+                    y: -4
                 }},        // spread operator is ... and it allows us to edit a property
                 rectangle: boundary
             })) {
                 player.velocity.y = 0       // colliding
                 break
             } else {
-                player.velocity.y = -5
+                player.velocity.y = -4
             }
         })*/
     } else if ((keys.a.pressed && lastKey === 'a') || (keys.ArrowLeft.pressed && lastKey === 'ArrowLeft')) {
@@ -637,7 +637,7 @@ function animate() {
             const boundary = boundaries[i]
             if (circleToRectangleCollision({
                 circle: {...player, velocity: {
-                    x: -5,
+                    x: -4,
                     y: 0
                 }},
                 rectangle: boundary
@@ -645,7 +645,7 @@ function animate() {
                 player.velocity.x = 0       // colliding
                 break
             } else {
-                player.velocity.x = -5
+                player.velocity.x = -4
             }
         }
     } else if ((keys.s.pressed && lastKey === 's') || (keys.ArrowDown.pressed && lastKey === 'ArrowDown')) {
@@ -655,14 +655,14 @@ function animate() {
             if (circleToRectangleCollision({
                 circle: {...player, velocity: {
                     x: 0,
-                    y: 5
+                    y: 4
                 }},
                 rectangle: boundary
             })) {
                 player.velocity.y = 0       // colliding
                 break
             } else {
-                player.velocity.y = 5
+                player.velocity.y = 4
             }
         }
     } else if ((keys.d.pressed && lastKey === 'd') || (keys.ArrowRight.pressed && lastKey === 'ArrowRight')) {
@@ -671,7 +671,7 @@ function animate() {
             const boundary = boundaries[i]
             if (circleToRectangleCollision({
                 circle: {...player, velocity: {
-                    x: 5,
+                    x: 4,
                     y: 0
                 }},
                 rectangle: boundary
@@ -679,7 +679,7 @@ function animate() {
                 player.velocity.x = 0       // colliding
                 break
             } else {
-                player.velocity.x = 5
+                player.velocity.x = 4
             }
         }
     } else if (keys.space.pressed && lastKey === ' ') {
@@ -744,6 +744,8 @@ function animate() {
                     eatenGhost.scared = false
                     eatenGhost.prevCollisions = []
                     eatenGhost.speed = 2    // reset speed to normal
+                    eatenGhost.image = createImage('./img/' + eatenGhost.name + '-ghost-transparent-up.png')
+                    console.log(eatenGhost.image)
                     // pause after respawn?
                     eatenGhost.velocity = { x: 0, y: 0 }
                     setTimeout(() => {
@@ -763,11 +765,12 @@ function animate() {
                 //console.log('you lose!')
                 //livesRemaining -= 1
                 //document.getElementById('lives').innerText = livesRemaining
-                /*const modal = document.getElementById('modal');
+                const modal = document.getElementById('pause-modal');
                 if (modal) {
-                    modal.querySelector('.modal-message').textContent = 'You Lose!';
-                    modal.style.display = 'flex';
-                }*/
+                    modal.querySelector('#modal-message').textContent = 'You Lose!';
+                    modal.querySelector('#resume-button').style.display = 'none'; // Hide resume button
+                    modal.style.display = 'block';
+                }
             }
         }
     }
@@ -776,10 +779,10 @@ function animate() {
     if (pellets.length === 0) {
         cancelAnimationFrame(animationID)
         console.log('you win!!!!!!!!!!')
-        const modal = document.getElementById('modal');
+        const modal = document.getElementById('pause-modal');
         if (modal) {
-            modal.querySelector('.modal-message').textContent = 'You Win!';
-            modal.style.display = 'flex';
+            modal.querySelector('#modal-message').textContent = 'You Win!';
+            modal.style.display = 'block';
         }
     }
 
@@ -808,7 +811,7 @@ function animate() {
                     ghost.scared = false
                     ghost.speed = 2    // reset speed to normal
                     console.log(ghost.scared)
-                }, 2000)       // for 2 seconds
+                }, 6000)       // for 6 seconds
             })
         }
     }
@@ -915,6 +918,10 @@ function GhostMovement() {
                     //console.log('you lose!')
                     livesRemaining -= 1
                     document.getElementById('lives').innerText = livesRemaining
+                    const modal = document.getElementById('pause-modal');
+                    modal.querySelector('#modal-message').textContent = 'You Lose!';
+                    modal.querySelector('#resume-button').style.display = 'none'; // Show resume button
+                    modal.style.display = 'block';
                 }
 
             // collisions array
@@ -943,7 +950,7 @@ function GhostMovement() {
                         circle: {
                             ...ghost,
                             velocity: {
-                                x: -5,
+                                x: -4,
                                 y: 0
                             }
                         },
@@ -960,7 +967,7 @@ function GhostMovement() {
                             ...ghost,
                             velocity: {
                                 x: 0,
-                                y: -5
+                                y: -4
                             }
                         },
                         rectangle: boundary
@@ -976,7 +983,7 @@ function GhostMovement() {
                             ...ghost,
                             velocity: {
                                 x: 0,
-                                y: 5
+                                y: 4
                             }
                         },
                         rectangle: boundary
@@ -1073,22 +1080,22 @@ window.addEventListener('keydown', ({key}) => {
     // respond to WASD keydown events
     switch (key) {
         case 'w':
-            //player.velocity.y = -5
+            //player.velocity.y = -4
             keys.w.pressed = true
             lastKey = 'w'
             break
         case 'a':
-            //player.velocity.x = -5
+            //player.velocity.x = -4
             keys.a.pressed = true
             lastKey = 'a'
             break
         case 's':
-            //player.velocity.y = 5
+            //player.velocity.y = 4
             keys.s.pressed = true
             lastKey = 's'
             break
         case 'd':
-            //player.velocity.x = 5
+            //player.velocity.x = 4
             keys.d.pressed = true
             lastKey = 'd'
             break
