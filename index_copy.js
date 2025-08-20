@@ -814,6 +814,7 @@ function animate() {
                     eatenGhost.speed = 2    // reset speed to normal
                     eatenGhost.image = createImage('./img/' + eatenGhost.name + '-ghost-transparent-up.png')
                     console.log(eatenGhost.image)
+                    console.log('respawning ' + eatenGhost.name + ' ghost')
                     // pause after respawn?
                     eatenGhost.velocity = { x: 0, y: 0 }
                     setTimeout(() => {
@@ -826,7 +827,7 @@ function animate() {
                         }*/
                     }, 500)
                     ghosts.push(eatenGhost)
-                }, 4000)
+                }, 4000)        // respawn 4s after eaten
             } else {
                 // touch ghost that isn't scared
                 cancelAnimationFrame(animationID)
@@ -852,6 +853,7 @@ function animate() {
         //modal = document.getElementById('pause-modal');
         if (modal) {
             modal.querySelector('#modal-message').textContent = 'You Win!';
+            modal.querySelector('#resume-button').style.display = 'none'; // Hide resume button
             modal.style.display = 'block';
         }
     }
@@ -874,14 +876,39 @@ function animate() {
 
             // make ghosts scared
             ghosts.forEach(ghost => {
+                ghost.scaredImage = createImage('./img/scared-ghost-transparent.png')
                 ghost.scared = true
                 ghost.speed = 1     // scared ghosts should slow down
 
+                // ghost blue for 4 seconds, then alternate between white and black
+                setTimeout(() => {
+                    // ChatGPT addition here
+                    const alt1 = createImage('./img/scared-ghost-transparent-alternate.png')
+                    const alt2 = createImage('./img/scared-ghost-transparent-alternate2.png')
+
+                    // start with alternate1 (white)
+                    ghost.scaredImage = alt1
+                    let toggle = false      // toggle variable
+
+                    // blink every 200 ms
+                    const blinkInterval = setInterval(() => {
+                        ghost.scaredImage = toggle ? alt1 : alt2
+                        toggle = !toggle
+                    }, 300)
+
+                    //stop blinking after 2.5s (total scared time is 6s)
+                    setTimeout(() => {
+                        clearInterval(blinkInterval)
+                    }, 2500)
+
+                    //ghost.scaredImage = createImage('./img/scared-ghost-transparent-alternate.png')
+                }, 3500)    // switch to alternate scared image (scared still === true) after 3.5s
+                
                 setTimeout(() => {
                     ghost.scared = false
                     ghost.speed = 2    // reset speed to normal
-                    console.log(ghost.scared)
-                }, 6000)       // for 6 seconds
+                    console.log(ghost.name + ' is scared? ' + ghost.scared)
+                }, 6000)       // switch back to normal after 2 more seconds (scared for 6 total seconds)
             })
         }
     }
