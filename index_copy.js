@@ -854,6 +854,7 @@ function animate() {
         if (modal) {
             modal.querySelector('#modal-message').textContent = 'You Win!';
             modal.querySelector('#resume-button').style.display = 'none'; // Hide resume button
+            modal.querySelector('#restart-button').style.display = 'inline'; // Show restart button
             modal.style.display = 'block';
         }
     }
