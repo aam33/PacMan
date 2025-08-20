@@ -737,6 +737,17 @@ function animate() {
             }
         }
     } else if (keys.space.pressed && lastKey === ' ') {
+        // store player velocity and ghost velocities
+        playerPausedVelocity = {...player.velocity}
+        ghosts.forEach(ghost => {
+            if (ghost.name === 'red')
+                redPausedVelocity = {...ghost.velocity}
+            if (ghost.name === 'pink')
+                pinkPausedVelocity = {...ghost.velocity}
+            if (ghost.name === 'blue')
+                bluePausedVelocity = {...ghost.velocity}
+        })
+
         // pause if spacebar pressed
         player.velocity.x = 0
         player.velocity.y = 0
@@ -819,7 +830,7 @@ function animate() {
             } else {
                 // touch ghost that isn't scared
                 cancelAnimationFrame(animationID)
-                //console.log('you lose!')
+                console.log('you lose!')
                 //livesRemaining -= 1
                 //document.getElementById('lives').innerText = livesRemaining
                 //const
@@ -888,7 +899,7 @@ function animate() {
             ) <
             pellet.radius + player.radius
         ) {
-            console.log('touching')
+            console.log('player touching pellet')
             pellets.splice(i, 1)
             // update score
             scoreVar += 10
@@ -974,7 +985,7 @@ function GhostMovement() {
                     ghost.radius + player.radius && !ghost.scared       // and ghost not scared
                 ) {
                     cancelAnimationFrame(animationID)
-                    //console.log('you lose!')
+                    console.log('you lose!')
                     livesRemaining -= 1
                     document.getElementById('lives').innerText = livesRemaining
                     //const
@@ -1185,8 +1196,27 @@ window.addEventListener('keydown', ({key}) => {
 })
 
 // if the restart button is pressed
-const restartButton = document.getElementById('restart-button');
+const restartButton = document.getElementById('restart-button')
 restartButton.addEventListener('click', () => {
-    modal.style.display = 'none';
+    modal.style.display = 'none'
     resetGame();
+});
+
+// if the resume button is pressed (only shows up on game pause)
+const resumeButton = document.getElementById('resume-button')
+resumeButton.addEventListener('click', () => {
+    modal.style.display = 'none'
+
+    keys.space.pressed = false
+    //lastKey = ''
+
+    // restore velocities
+    player.velocity = {...playerPausedVelocity}
+    ghosts.forEach(ghost => {
+        if (ghost.name === 'red') ghost.velocity = {...redPausedVelocity}
+        if (ghost.name === 'pink') ghost.velocity = {...pinkPausedVelocity}
+        if (ghost.name === 'blue') ghost.velocity = {...bluePausedVelocity}
+    })
+
+    animate()
 });
