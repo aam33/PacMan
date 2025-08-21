@@ -830,20 +830,21 @@ function animate() {
                     }, 500)
                     ghosts.push(eatenGhost)
                 }, 4000)        // respawn 4s after eaten
-            } else {
+            } /*else {
                 // touch ghost that isn't scared
                 cancelAnimationFrame(animationID)
                 console.log('player touched normal ghost')
                 //livesRemaining -= 1
                 //document.getElementById('lives').innerText = livesRemaining
+                
                 //const
                 //modal = document.getElementById('pause-modal');
-                /*if (modal) {
+                if (modal) {
                     modal.querySelector('#modal-message').textContent = 'You Lose!';
                     modal.querySelector('#resume-button').style.display = 'none'; // Hide resume button
                     modal.style.display = 'block';
-                }*/
-            }
+                }
+            }*/
         }
     }
 
