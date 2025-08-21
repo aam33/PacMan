@@ -594,18 +594,20 @@ function setupForExit(ghost) {
     }
 }
 
-function resetGame() {
+function resetGame(fullReset) {
     modal.style.display = 'none'; // Hide modal
 
     // Reset key states and lastKey
     lastKey = '';
     Object.keys(keys).forEach(k => keys[k].pressed = false);
 
-    scoreVar = 0;
-    score.innerHTML = scoreVar;
+    if (fullReset) {
+        scoreVar = 0;
+        score.innerHTML = scoreVar;
 
-    livesRemaining = 3
-    lives.innerHTML = livesRemaining;
+        livesRemaining = 3
+        lives.innerHTML = livesRemaining;
+    }
 
     // Reset player position
     player.position = {
@@ -831,16 +833,16 @@ function animate() {
             } else {
                 // touch ghost that isn't scared
                 cancelAnimationFrame(animationID)
-                console.log('you lose!')
+                console.log('player touched normal ghost')
                 //livesRemaining -= 1
                 //document.getElementById('lives').innerText = livesRemaining
                 //const
                 //modal = document.getElementById('pause-modal');
-                if (modal) {
+                /*if (modal) {
                     modal.querySelector('#modal-message').textContent = 'You Lose!';
                     modal.querySelector('#resume-button').style.display = 'none'; // Hide resume button
                     modal.style.display = 'block';
-                }
+                }*/
             }
         }
     }
@@ -1018,9 +1020,18 @@ function GhostMovement() {
                     document.getElementById('lives').innerText = livesRemaining
                     //const
                     //modal = document.getElementById('pause-modal');
-                    modal.querySelector('#modal-message').textContent = 'You Lose!';
-                    modal.querySelector('#resume-button').style.display = 'none'; // Show resume button
-                    modal.style.display = 'block';
+
+                    // life logic; reset unless lives <= 0
+                    if (livesRemaining <= 0) {
+                        modal.querySelector('#modal-message').textContent = 'You Lose!';
+                        modal.querySelector('#resume-button').style.display = 'none'; // Show resume button
+                        modal.style.display = 'block';
+                    }
+                    else {
+                        setTimeout(() => {
+                            resetGame(false);   // Reset game without full reset
+                        }, 1000);
+                    }
                 }
 
             // collisions array
@@ -1227,7 +1238,7 @@ window.addEventListener('keydown', ({key}) => {
 const restartButton = document.getElementById('restart-button')
 restartButton.addEventListener('click', () => {
     modal.style.display = 'none'
-    resetGame();
+    resetGame(true); // Full reset
 });
 
 // if the resume button is pressed (only shows up on game pause)
