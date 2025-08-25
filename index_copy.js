@@ -6,7 +6,7 @@ function drawLives() {
     const y = Boundary.height * 13 + 30;
     // Start x a bit in from the left
     const startX = Boundary.width + radius;
-    for (let i = 0; i < livesRemaining; i++) {
+    for (let i = 0; i < livesRemaining - 1; i++) {
         const x = startX + i * spacing;
         c.save();
         c.beginPath();
