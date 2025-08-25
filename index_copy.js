@@ -1,3 +1,25 @@
+// Draw Pac-Man circles for each remaining life below the grid
+function drawLives() {
+    const radius = 15;
+    const spacing = 40;
+    // Position below the grid: y is just below the last row
+    const y = Boundary.height * 13 + 30;
+    // Start x a bit in from the left
+    const startX = Boundary.width + radius;
+    for (let i = 0; i < livesRemaining; i++) {
+        const x = startX + i * spacing;
+        c.save();
+        c.beginPath();
+        // Draw Pac-Man facing right, mouth open
+        c.arc(x, y, radius, 0.25 * Math.PI, 1.75 * Math.PI, false);
+        c.lineTo(x, y);
+        c.fillStyle = 'yellow';
+        c.fill();
+        c.closePath();
+        c.restore();
+    }
+}
+
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 console.log(canvas)
@@ -595,18 +617,21 @@ function setupForExit(ghost) {
 }
 
 function resetGame(fullReset) {
-    modal.style.display = 'none'; // Hide modal
+    modal.style.display = 'none' // Hide modal
 
     // Reset key states and lastKey
-    lastKey = '';
-    Object.keys(keys).forEach(k => keys[k].pressed = false);
+    lastKey = ''
+    Object.keys(keys).forEach(k => keys[k].pressed = false)
 
     if (fullReset) {
-        scoreVar = 0;
-        score.innerHTML = scoreVar;
+        scoreVar = 0
+        score.innerHTML = scoreVar
 
         livesRemaining = 3
-        lives.innerHTML = livesRemaining;
+        lives.innerHTML = livesRemaining
+
+        // reset pellets and powerups
+        setMap()   // only reset map if full reset
     }
 
     // Reset player position
@@ -619,7 +644,7 @@ function resetGame(fullReset) {
         y: 0
     }
     // Reset player rotation
-    player.rotation = 0;
+    player.rotation = 0
 
     // Reset ghosts
     ghosts.forEach(ghost => {
@@ -628,13 +653,10 @@ function resetGame(fullReset) {
         ghost.scared = false
         ghost.image = createImage('./img/' + ghost.name + '-ghost-transparent-up.png')
 
-        setupForExit(ghost);
-    });
+        setupForExit(ghost)
+    })
 
-    // reset pellets and powerups
-    setMap();
-
-    animate();
+    animate()
 }
 
 
@@ -1110,17 +1132,43 @@ function GhostMovement() {
             if (JSON.stringify(collisions) !== JSON.stringify(ghost.prevCollisions)) {
                 console.log('gogo')
 
-                if (ghost.velocity.x > 0) ghost.prevCollisions.push('right')
-                else if (ghost.velocity.x < 0) ghost.prevCollisions.push('left')
-                else if (ghost.velocity.y < 0) ghost.prevCollisions.push('up')
-                else if (ghost.velocity.y > 0) ghost.prevCollisions.push('down')
+                // Determine current and reverse directions
+                let currentDirection = null;
+                let reverseDirection = null;
+                if (ghost.velocity.x > 0) {
+                    currentDirection = 'right';
+                    reverseDirection = 'left';
+                } else if (ghost.velocity.x < 0) {
+                    currentDirection = 'left';
+                    reverseDirection = 'right';
+                } else if (ghost.velocity.y < 0) {
+                    currentDirection = 'up';
+                    reverseDirection = 'down';
+                } else if (ghost.velocity.y > 0) {
+                    currentDirection = 'down';
+                    reverseDirection = 'up';
+                }
+
+                if (currentDirection) ghost.prevCollisions.push(currentDirection);
 
                 console.log(collisions)
                 console.log(ghost.prevCollisions)
 
-                const pathways = ghost.prevCollisions.filter(collision => {
+                // Build possible pathways
+                let pathways = ghost.prevCollisions.filter(collision => {
                     return !collisions.includes(collision)
-                })
+                });
+
+                // If the current direction is NOT blocked, exclude the reverse direction from pathways
+                if (currentDirection && !collisions.includes(currentDirection)) {
+                    pathways = pathways.filter(dir => dir !== reverseDirection);
+                }
+                // If all other directions are blocked, allow reverse
+                if (pathways.length === 0 && reverseDirection) {
+                    // Only possible to go back
+                    pathways = [reverseDirection];
+                }
+
                 console.log({pathways})
 
                 // choose random path from pathways array
@@ -1178,6 +1226,8 @@ else if (player.velocity.x < 0) player.rotation = Math.PI
 else if (player.velocity.y > 0) player.rotation = Math.PI / 2
 else if (player.velocity.y < 0) player.rotation = Math.PI * 1.5
 
+// Draw lives below the grid
+drawLives();
 }
 
 animate()
