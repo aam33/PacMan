@@ -616,7 +616,7 @@ function setupForExit(ghost) {
     }
 }
 
-function resetGame(fullReset) {
+function resetGame(fullReset, newLevel) {
     modal.style.display = 'none' // Hide modal
 
     // Reset key states and lastKey
@@ -632,6 +632,10 @@ function resetGame(fullReset) {
 
         // reset pellets and powerups
         setMap()   // only reset map if full reset
+    }
+
+    if (newLevel) {
+        setMap()   // reset map for new level, but don't reset score or lives counter
     }
 
     // Reset player position
@@ -880,6 +884,7 @@ function animate() {
             modal.querySelector('#modal-message').textContent = 'You Win!';
             modal.querySelector('#resume-button').style.display = 'none'; // Hide resume button
             modal.querySelector('#restart-button').style.display = 'inline'; // Show restart button
+            modal.querySelector('#next-level-button').style.display = 'inline'; // Show next level button
             modal.style.display = 'block';
         }
     }
@@ -1047,12 +1052,14 @@ function GhostMovement() {
                     // life logic; reset unless lives <= 0
                     if (livesRemaining <= 0) {
                         modal.querySelector('#modal-message').textContent = 'You Lose!';
-                        modal.querySelector('#resume-button').style.display = 'none'; // Show resume button
+                        modal.querySelector('#resume-button').style.display = 'none'; // Hide resume button
+                        modal.querySelector('#next-level-button').style.display = 'none'; // Hide next level button
+                        modal.querySelector('#restart-button').style.display = 'inline'; // Show restart button
                         modal.style.display = 'block';
                     }
                     else {
                         setTimeout(() => {
-                            resetGame(false);   // Reset game without full reset
+                            resetGame(false, false);   // Reset game without full reset
                         }, 1000);
                     }
                 }
@@ -1289,7 +1296,7 @@ window.addEventListener('keydown', ({key}) => {
 const restartButton = document.getElementById('restart-button')
 restartButton.addEventListener('click', () => {
     modal.style.display = 'none'
-    resetGame(true); // Full reset
+    resetGame(true, false); // Full reset
 });
 
 // if the resume button is pressed (only shows up on game pause)
@@ -1309,4 +1316,10 @@ resumeButton.addEventListener('click', () => {
     })
 
     animate()
+});
+
+const nextLevelButton = document.getElementById('next-level-button')
+nextLevelButton.addEventListener('click', () => {
+    modal.style.display = 'none'
+    resetGame(false, true) // Reset game for new level
 });
