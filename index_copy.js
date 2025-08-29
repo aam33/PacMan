@@ -317,11 +317,15 @@ const keys = {
     }
 }
 
-// let instead of const
+// let instead of const so you can edit within functions
 let lastKey = ''    // empty string by default
 let scoreVar = 0    // default
+let oldScore = 0
+let prevMultipleOfTenThousand = 0
+let newMultipleOfTenThousand = 0
 let ghostsEatenDuringPowerup = 0       // will come into use later
 let livesRemaining = 3
+let level = 1
 
 function createImage(src) {
     const image = new Image()
@@ -626,15 +630,24 @@ function resetGame(fullReset, newLevel) {
     if (fullReset) {
         scoreVar = 0
         score.innerHTML = scoreVar
+        oldScore = 0
+        prevMultipleOfTenThousand = 0
+        newMultipleOfTenThousand = 0
 
         livesRemaining = 3
         lives.innerHTML = livesRemaining
 
+        level = 1
+        document.getElementById('levelText').innerText = level
+        
         // reset pellets and powerups
         setMap()   // only reset map if full reset
     }
 
     if (newLevel) {
+        level++
+        document.getElementById('levelText').innerText = level
+
         setMap()   // reset map for new level, but don't reset score or lives counter
     }
 
@@ -794,6 +807,7 @@ function animate() {
         modal.querySelector('#modal-message').textContent = 'Game Paused'
         modal.querySelector('#resume-button').style.display = 'inline'; // Show resume button
         modal.querySelector('#restart-button').style.display = 'inline'; // Show restart button
+        modal.querySelector('#next-level-button').style.display = 'none'; // Hide next level button
         modal.style.display = 'block'
     }
 
@@ -818,16 +832,56 @@ function animate() {
 
                 switch (ghostsEatenDuringPowerup) {
                     case 1:
+                        oldScore = scoreVar
                         scoreVar += 200
+             
+                        prevMultipleOfTenThousand = Math.floor(oldScore / 10000)
+                        newMultipleOfTenThousand = Math.floor(scoreVar / 10000)
+
+                        if (newMultipleOfTenThousand > prevMultipleOfTenThousand) {
+                            livesRemaining += 1  // new life
+                            document.getElementById('lives').innerText = livesRemaining
+                            // then draw a new Pac-Man at the bottom by default
+                        }
                         break
                     case 2:
+                        oldScore = scoreVar
                         scoreVar += 400
+
+                        prevMultipleOfTenThousand = Math.floor(oldScore / 10000)
+                        newMultipleOfTenThousand = Math.floor(scoreVar / 10000)
+
+                        if (newMultipleOfTenThousand > prevMultipleOfTenThousand) {
+                            livesRemaining += 1  // new life
+                            document.getElementById('lives').innerText = livesRemaining
+                            // then draw a new Pac-Man at the bottom by default
+                        }
                         break
                     case 3:
+                        oldScore = scoreVar
                         scoreVar += 800
+
+                        prevMultipleOfTenThousand = Math.floor(oldScore / 10000)
+                        newMultipleOfTenThousand = Math.floor(scoreVar / 10000)
+
+                        if (newMultipleOfTenThousand > prevMultipleOfTenThousand) {
+                            livesRemaining += 1  // new life
+                            document.getElementById('lives').innerText = livesRemaining
+                            // then draw a new Pac-Man at the bottom by default
+                        }
                         break
                     case 4:     // this condition will never be hit unless I add another ghost
+                        oldScore = scoreVar
                         scoreVar += 1600
+
+                        prevMultipleOfTenThousand = Math.floor(oldScore / 10000)
+                        newMultipleOfTenThousand = Math.floor(scoreVar / 10000)
+
+                        if (newMultipleOfTenThousand > prevMultipleOfTenThousand) {
+                            livesRemaining += 1  // new life
+                            document.getElementById('lives').innerText = livesRemaining
+                            // then draw a new Pac-Man at the bottom by default
+                        }
                         break
                 }
 
@@ -878,10 +932,11 @@ function animate() {
     if (pellets.length === 0) {
         cancelAnimationFrame(animationID)
         console.log('you win!!!!!!!!!!')
+
         //const
         //modal = document.getElementById('pause-modal');
         if (modal) {
-            modal.querySelector('#modal-message').textContent = 'You Win!';
+            modal.querySelector('#modal-message').textContent = 'Good Job!';
             modal.querySelector('#resume-button').style.display = 'none'; // Hide resume button
             modal.querySelector('#restart-button').style.display = 'inline'; // Show restart button
             modal.querySelector('#next-level-button').style.display = 'inline'; // Show next level button
@@ -960,8 +1015,18 @@ function animate() {
             console.log('player touching pellet')
             pellets.splice(i, 1)
             // update score
+            oldScore = scoreVar
             scoreVar += 10
             score.innerHTML = scoreVar
+
+            prevMultipleOfTenThousand = Math.floor(oldScore / 10000)
+            newMultipleOfTenThousand = Math.floor(scoreVar / 10000)
+
+            if (newMultipleOfTenThousand > prevMultipleOfTenThousand) {
+                livesRemaining += 1  // new life
+                document.getElementById('lives').innerText = livesRemaining
+                // then draw a new Pac-Man at the bottom by default
+            }
         }
     }
 
@@ -1051,7 +1116,7 @@ function GhostMovement() {
 
                     // life logic; reset unless lives <= 0
                     if (livesRemaining <= 0) {
-                        modal.querySelector('#modal-message').textContent = 'You Lose!';
+                        modal.querySelector('#modal-message').textContent = 'Game Over';
                         modal.querySelector('#resume-button').style.display = 'none'; // Hide resume button
                         modal.querySelector('#next-level-button').style.display = 'none'; // Hide next level button
                         modal.querySelector('#restart-button').style.display = 'inline'; // Show restart button
